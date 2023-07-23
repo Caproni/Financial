@@ -4,4 +4,4 @@ from dotenv import load_dotenv
 
 def create_client() -> TradingClient:
     load_dotenv()
-    return TradingClient('api-key', 'secret-key')
+    return TradingClient("api-key", "secret-key")
