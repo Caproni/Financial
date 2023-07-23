@@ -4,7 +4,7 @@ Author: Edmund Bennett
 Copyright 2023
 """
 
-from amor.money.money import Money
+from src.amortization.money.money import Money
 
 
 class MonthlyRepayment:

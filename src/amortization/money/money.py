@@ -129,12 +129,12 @@ class Money:
                     "Attempting to divide monies from different datetimes. Adjust for inflation."
                 )
 
-            total_cents = (100 * self.integral + self.mantissa) / (100 * other.integral + other.mantissa)
+            total_cents = (100 * self.integral + self.mantissa) / (
+                100 * other.integral + other.mantissa
+            )
             return float(total_cents)
 
-        raise NotImplementedError(
-            f"Division not implemented for type: {type(other)}"
-        )
+        raise NotImplementedError(f"Division not implemented for type: {type(other)}")
 
     def __eq__(self, other) -> bool:
         if (

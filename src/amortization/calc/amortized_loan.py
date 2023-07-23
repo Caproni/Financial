@@ -7,8 +7,8 @@ Copyright 2023
 from typing import Union
 from datetime import datetime
 
-from amor.money.money import Money
-from amor.calc.monthly_repayment import MonthlyRepayment
+from src.amortization.money.money import Money
+from src.amortization.calc.monthly_repayment import MonthlyRepayment
 
 
 class AmortizedLoan:
@@ -57,4 +57,3 @@ class AmortizedLoan:
             total_interest_payment += payment["interest_payment"]
 
         return total_interest_payment
-
