@@ -4,6 +4,7 @@ Author: Edmund Bennett
 Copyright 2023
 """
 
+
 def calc_maximum_drawdown_value(
     data: list[float | int],
 ) -> dict[str, float | int | None]:
@@ -16,11 +17,25 @@ def calc_maximum_drawdown_value(
     Returns:
         dict[str, Any]: Dictionary describing the max drawdown value.
     """
-    
-    high_water_mark = max(data)
-    high_water_mark_index = data.index(high_water_mark)
-    
+
+    maximum_drawdown_max_index = None
+    maximum_drawdown_min_index = None
+    maximum_drawdown = 0
+    for i, datum in enumerate(data):
+        if i + 1 < len(data):
+            proceeding = data[i + 1 :]  # all data after the current point
+            for j, p in enumerate(proceeding, start=1):
+                if p < datum and maximum_drawdown < (datum - p):
+                    maximum_drawdown = datum - p
+                    maximum_drawdown_max_index = i
+                    maximum_drawdown_min_index = i + j
+
     return {
-        "high_water_mark": high_water_mark,
-        "maximum_drawdown_value":  high_water_mark - min(data[high_water_mark_index:]),
+        "maximum_drawdown_max_index": maximum_drawdown_max_index,
+        "maximum_drawdown_min_index": maximum_drawdown_min_index,
+        "maximum_drawdown_value": data[maximum_drawdown_max_index]
+        - data[maximum_drawdown_min_index]
+        if maximum_drawdown_max_index is not None
+        and maximum_drawdown_min_index is not None
+        else None,
     }
