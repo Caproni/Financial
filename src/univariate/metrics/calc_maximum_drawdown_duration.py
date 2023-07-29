@@ -43,6 +43,8 @@ def calc_maximum_drawdown_duration(
         "high_water_mark": high_water_mark,
         "high_water_mark_index": high_water_mark_index,
         "drawdown_end_index":  drawdown_end_index,
+        "drawdown_index_steps": drawdown_end_index - high_water_mark_index,
         "high_water_mark_timestamp": high_water_mark_timestamp,
         "drawdown_end_timestamp": drawdown_end_timestamp,
+        "maximum_drawdown_duration": drawdown_end_timestamp - high_water_mark_timestamp,
     }
