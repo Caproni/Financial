@@ -23,28 +23,33 @@ def calc_maximum_drawdown_duration(
         dict[str, Any]: Dictionary describing the max drawdown duration.
     """
     
-    high_water_mark = max(data)
-    high_water_mark_index = data.index(high_water_mark)
-    following_data = [True if e >= high_water_mark else False for e in data[high_water_mark_index:]]
-    drawdown_end_index = None
-    for i, datum in enumerate(following_data):
-        if i > 0 and datum:
-            drawdown_end_index = i
-        
-    
-    high_water_mark_timestamp, drawdown_end_timestamp = None, None
     if ts is not None:
         assert len(ts) == len(data), "The same number of data values as timestamp values are expected"
-        high_water_mark_timestamp = ts.index(high_water_mark_index)
-        if drawdown_end_index is not None:
-            drawdown_end_timestamp = ts.index(drawdown_end_index)
+    
+    maximum_drawdown_duration_start_index = None
+    maximum_drawdown_duration_end_index = None
+    mdd_duration = 0
+    for i, datum in enumerate(data):
+        print(f"Index: {i} has value: {datum}")
+        if i + 1 < len(data) - mdd_duration:
+            proceeding = data[i + 1:]  # all data after the current point
+            for j, p in enumerate(proceeding, start=1):
+                print(f"Inner index: {j} has value: {p}")
+                if p < datum and mdd_duration < j:
+                    print(f"Inner: {p} is less than outer: {datum}")
+                    mdd_duration = j
+                    maximum_drawdown_duration_start_index = i
+                    maximum_drawdown_duration_end_index = i + j
+                else:
+                    break
+    
+    print(f"MDD Duration start index: {maximum_drawdown_duration_start_index}")
+    print(f"MDD Duration end index: {maximum_drawdown_duration_end_index}")
+    print(f"MDD Duration: {mdd_duration}")
     
     return {
-        "high_water_mark": high_water_mark,
-        "high_water_mark_index": high_water_mark_index,
-        "drawdown_end_index":  drawdown_end_index,
-        "drawdown_index_steps": drawdown_end_index - high_water_mark_index,
-        "high_water_mark_timestamp": high_water_mark_timestamp,
-        "drawdown_end_timestamp": drawdown_end_timestamp,
-        "maximum_drawdown_duration": drawdown_end_timestamp - high_water_mark_timestamp,
+        "maximum_drawdown_duration_start_index": maximum_drawdown_duration_start_index,
+        "maximum_drawdown_duration_end_index": maximum_drawdown_duration_end_index,
+        "maximum_drawdown_duration_start_timestamp":  ts[maximum_drawdown_duration_start_index] if ts is not None and maximum_drawdown_duration_start_index is not None else None,
+        "maximum_drawdown_duration_end_timestamp": ts[maximum_drawdown_duration_end_index] if ts is not None and maximum_drawdown_duration_end_index is not None else None,
     }
