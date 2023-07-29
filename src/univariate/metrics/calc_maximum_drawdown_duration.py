@@ -25,12 +25,24 @@ def calc_maximum_drawdown_duration(
     
     high_water_mark = max(data)
     high_water_mark_index = data.index(high_water_mark)
+    following_data = [True if e >= high_water_mark else False for e in data[high_water_mark_index:]]
+    drawdown_end_index = None
+    for i, datum in enumerate(following_data):
+        if i > 0 and datum:
+            drawdown_end_index = i
+        
     
+    high_water_mark_timestamp, drawdown_end_timestamp = None, None
     if ts is not None:
         assert len(ts) == len(data), "The same number of data values as timestamp values are expected"
+        high_water_mark_timestamp = ts.index(high_water_mark_index)
+        if drawdown_end_index is not None:
+            drawdown_end_timestamp = ts.index(drawdown_end_index)
     
     return {
         "high_water_mark": high_water_mark,
         "high_water_mark_index": high_water_mark_index,
-        "maximum_drawdown_duration":  high_water_mark - min(data[high_water_mark_index:]),
+        "drawdown_end_index":  drawdown_end_index,
+        "high_water_mark_timestamp": high_water_mark_timestamp,
+        "drawdown_end_timestamp": drawdown_end_timestamp,
     }
