@@ -4,6 +4,8 @@ Author: Edmund Bennett
 Copyright 2023
 """
 
+from ...utils.logger import logger as log
+
 
 def calc_maximum_drawdown_value(
     data: list[float | int],
@@ -16,6 +18,7 @@ def calc_maximum_drawdown_value(
     Returns:
         dict[str, Any]: Dictionary describing the max drawdown value.
     """
+    log.info("Calling calc_maximum_drawdown_value")
 
     maximum_drawdown_max_index = None
     maximum_drawdown_min_index = None

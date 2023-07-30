@@ -4,8 +4,9 @@ Author: Edmund Bennett
 Copyright 2023
 """
 
-from typing import Any
 from datetime import datetime
+
+from ...utils.logger import logger as log
 
 
 def calc_maximum_drawdown_duration(
@@ -22,6 +23,7 @@ def calc_maximum_drawdown_duration(
     Returns:
         dict[str, Any]: Dictionary describing the max drawdown duration.
     """
+    log.info("Calling calc_maximum_drawdown_duration")
 
     if ts is not None:
         assert len(ts) == len(

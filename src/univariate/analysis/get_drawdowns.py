@@ -4,6 +4,8 @@ Author: Edmund Bennett
 Copyright 2023
 """
 
+from ...utils.logger import logger as log
+
 
 def get_drawdowns(
     data: list[float | int],
@@ -17,6 +19,7 @@ def get_drawdowns(
     Returns:
         dict[str, Any]: Dictionary describing the max drawdown value.
     """
+    log.info("Calling get_drawdowns")
 
     drawdowns = []
     previous_datum = -1  # data values are assumed to be positive semi-definite

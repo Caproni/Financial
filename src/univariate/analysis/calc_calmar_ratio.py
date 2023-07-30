@@ -8,7 +8,7 @@ from datetime import datetime
 
 from .calc_average_annualized_return import calc_average_annualized_return
 from .calc_maximum_drawdown_value import calc_maximum_drawdown_value
-
+from ...utils.logger import logger as log
 
 def calc_calmar_ratio(
     data: list[float | int],
@@ -22,6 +22,7 @@ def calc_calmar_ratio(
     Returns:
         float: The Calmar ratio
     """
+    log.info("Calling calc_calmar_ratio")
 
     assert len(data) == len(
         ts

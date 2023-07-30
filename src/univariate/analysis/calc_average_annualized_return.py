@@ -6,6 +6,8 @@ Copyright 2023
 
 from datetime import datetime, timedelta
 
+from ...utils.logger import logger as log
+
 
 def calc_average_annualized_return(
     start_value: float | int,
@@ -21,6 +23,7 @@ def calc_average_annualized_return(
     Returns:
         float: The averaged annualized return for the timeseries data
     """
+    log.info("Calling calc_average_annualized_return")
 
     exact_year = timedelta(days=365, hours=24 / 4)
     return (end_value - start_value) * exact_year / (end_time - start_time) * 100
