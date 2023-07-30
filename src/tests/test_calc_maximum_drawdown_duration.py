@@ -6,7 +6,7 @@ Copyright 2023
 
 from datetime import datetime, timedelta
 
-from src.univariate.metrics.calc_maximum_drawdown_duration import (
+from src.univariate.analysis.calc_maximum_drawdown_duration import (
     calc_maximum_drawdown_duration,
 )
 
