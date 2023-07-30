@@ -21,8 +21,6 @@ def calc_average_annualized_return(
     Returns:
         float: The averaged annualized return for the timeseries data
     """
-    
+
     exact_year = timedelta(days=365, hours=24 / 4)
     return (end_value - start_value) * exact_year / (end_time - start_time) * 100
-    
-    

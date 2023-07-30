@@ -25,7 +25,10 @@ def calc_maximum_drawdown_value(
         if i + 1 < len(data):
             proceeding = data[i + 1 :]  # all data after the current point
             for j, p in enumerate(proceeding, start=1):
-                if p < datum and maximum_drawdown_percentage < (datum - p) / datum * 100:
+                if (
+                    p < datum
+                    and maximum_drawdown_percentage < (datum - p) / datum * 100
+                ):
                     maximum_drawdown_percentage = (datum - p) / datum * 100
                     maximum_drawdown_value = datum - p
                     maximum_drawdown_max_index = i
@@ -35,5 +38,9 @@ def calc_maximum_drawdown_value(
         "maximum_drawdown_max_index": maximum_drawdown_max_index,
         "maximum_drawdown_min_index": maximum_drawdown_min_index,
         "maximum_drawdown_value": maximum_drawdown_value,
-        "maximum_drawdown_value_percentage": maximum_drawdown_value / data[maximum_drawdown_max_index] * 100 if maximum_drawdown_value is not None else None,
+        "maximum_drawdown_value_percentage": maximum_drawdown_value
+        / data[maximum_drawdown_max_index]
+        * 100
+        if maximum_drawdown_value is not None
+        else None,
     }
