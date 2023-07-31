@@ -37,12 +37,11 @@ def get_moving_average(
     ma_data_mean, ma_data_sd = [], []
     for i in range(len(data)):
         lower = max(0, i - steps) if steps is not None else 0
-        upper = min(len(data), i + steps) if steps is not None else len(data)
         if weighting == "linear":
-            subset = data[lower:upper]
+            subset = data[lower:i + 1]
         elif weighting == "exponential":
-            subset = [exp(-abs(i - j)) * d for j, d in enumerate(data[lower:upper])]
+            subset = [d * exp(j - i) for j, d in enumerate(data[lower:i + 1])]
         ma_data_mean.append(mean(subset))
-        ma_data_sd.append(stdev(subset))
+        ma_data_sd.append(stdev(subset) if len(subset) > 1 else None)
 
     return ma_data_mean, ma_data_sd
