@@ -13,6 +13,7 @@ from src.utils.logger import logger as log
 
 def create_broker_client(
     sandbox: bool = True,
+    version: str = "v2",
 ) -> BrokerClient:
     log.info("Calling create_broker_client")
     load_dotenv()
@@ -22,4 +23,6 @@ def create_broker_client(
         if sandbox
         else getenv("ALPACA_LIVE_SECRET"),
         sandbox=sandbox,
+        api_version=version,
+        url_override=getenv("ALPACA_PAPER_URL") if sandbox else getenv("ALPACA_LIVE_URL"),
     )

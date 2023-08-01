@@ -8,7 +8,7 @@ from datetime import timedelta
 from alpaca.trading.client import TradingClient
 from alpaca.broker.client import BrokerClient
 
-from src.brokerage.alpaca.trading.get_clock import get_clock
+from src.brokerage.alpaca.broker.get_clock import get_clock
 from src.brokerage.alpaca.trading.close_all_positions import close_all_positions
 from src.utils.logger import logger as log
 
@@ -30,7 +30,7 @@ def close_positions_conditionally(
     """
     log.info("Calling close_positions_conditionally")
     clock = get_clock(broker_client)
-    if clock < within:
+    if clock.is_open and clock.timestamp + within >= clock.next_close:
         log.info("Attempting to close all positions")
         close_all_positions(trading_client)
         return True
