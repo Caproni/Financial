@@ -13,7 +13,7 @@ def close_all_positions(
     client: TradingClient,
     cancel_orders: bool = True,
 ):
-    """Closes all open positions. Can be used at end of day to end the day's trading.
+    """Closes all open positions. Can be used at end of day.
 
     Args:
         client (TradingClient): A trading client
