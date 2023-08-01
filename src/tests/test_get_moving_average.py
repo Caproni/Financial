@@ -14,5 +14,5 @@ def test_get_moving_average():
         weighting="linear",
         steps=2,
     )
-    
+
     assert len(ma_data_mean) == 5

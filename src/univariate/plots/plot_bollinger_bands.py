@@ -16,13 +16,13 @@ def plot_bollinger_bands(
     steps: int = 20,
 ):
     log.info("Calling plot_bollinger_bands")
-    
+
     av, std = get_moving_average(
-        data, 
+        data,
         weighting=weighting,
         steps=steps,
     )
-    
+
     plt.plot(data, c="r")
     plt.plot(av, c="b")
     plt.plot([a + 2 * s if s is not None else None for a, s in zip(av, std)], c="k")
@@ -30,4 +30,3 @@ def plot_bollinger_bands(
     plt.xlabel("Time")
     plt.ylabel("Price")
     plt.show()
-    

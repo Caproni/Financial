@@ -1,3 +1,9 @@
+#!/usr/local/bin/python
+"""
+Author: Edmund Bennett
+Copyright 2023
+"""
+
 from alpaca.trading.client import TradingClient
 from dotenv import load_dotenv
 from os import getenv
