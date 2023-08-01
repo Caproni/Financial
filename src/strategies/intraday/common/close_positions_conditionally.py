@@ -24,7 +24,7 @@ def close_positions_conditionally(
         trading_client (TradingClient): An Alpaca trading client.
         broker_client (BrokerClient): An Alpaca trading client.
         within (timedelta): Duration condition used to check whether market positions should be closed.
-    
+
     Returns:
         bool: Whether or not all positions have been closed
     """

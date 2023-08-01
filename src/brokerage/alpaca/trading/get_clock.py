@@ -12,5 +12,5 @@ from src.utils.logger import logger as log
 def get_clock(
     client: BrokerClient,
 ):
-    log.info("Calling get_market_times")
+    log.info("Calling get_clock")
     return client.get_clock()
