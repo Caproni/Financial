@@ -5,7 +5,7 @@ Copyright 2023
 """
 
 import matplotlib.pyplot as plt
-from math import sqrt
+from math import sqrt, floor
 
 from ..analysis.get_drawdowns import get_drawdowns
 from src.utils.logger import logger as log
@@ -13,14 +13,15 @@ from src.utils.logger import logger as log
 
 def plot_drawdown_histogram(
     data: list[int | float],
-) -> plt.figure:
+):
     log.info("Calling plot_drawdown_histogram")
 
     drawdowns = get_drawdowns(data)
 
-    fig = plt.figure()
-    fig.hist(
+    plt.hist(
         drawdowns,
-        bins=sqrt(len(drawdowns)),
+        bins=floor(sqrt(len(drawdowns))),
     )
-    return fig
+    plt.xlabel("Drawdown")
+    plt.ylabel("Frequency")
+    plt.show()

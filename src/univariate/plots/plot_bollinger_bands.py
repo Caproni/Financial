@@ -27,5 +27,7 @@ def plot_bollinger_bands(
     plt.plot(av, c="b")
     plt.plot([a + 2 * s if s is not None else None for a, s in zip(av, std)], c="k")
     plt.plot([a - 2 * s if s is not None else None for a, s in zip(av, std)], c="k")
+    plt.xlabel("Time")
+    plt.ylabel("Price")
     plt.show()
     
