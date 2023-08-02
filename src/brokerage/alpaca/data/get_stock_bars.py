@@ -6,8 +6,9 @@ Copyright 2023
 
 from alpaca.data.historical.stock import StockHistoricalDataClient
 from alpaca.data.requests import StockBarsRequest
-from alpaca.data.enums import Adjustment, DataFeed
+from alpaca.data.enums import Adjustment
 from alpaca.data.timeframe import TimeFrame
+from alpaca.data.models import BarSet
 from datetime import datetime
 
 from src.utils.logger import logger as log
@@ -19,7 +20,7 @@ def get_stock_bars(
     timeframe: TimeFrame,
     start: datetime = None,
     end: datetime = None,
-) -> None:
+) -> BarSet:
     """Gets historical stock data
 
     Args:
@@ -30,7 +31,7 @@ def get_stock_bars(
         end (datetime, optional): End datetime for data retrieval. Defaults to None.
 
     Returns:
-        _type_: _description_
+        BarSet: Historical dataset
     """
     log.info("Calling get_stock_bars")
     return client.get_stock_bars(
