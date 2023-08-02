@@ -13,5 +13,5 @@ def get_clock(
     client: BrokerClient,
 ):
     log.info("Calling get_clock")
-    
+
     return client.get_clock()

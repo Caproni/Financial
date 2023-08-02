@@ -17,7 +17,9 @@ def create_broker_client(
     log.info("Calling create_broker_client")
     load_dotenv()
     return BrokerClient(
-        api_key=getenv("ALPACA_BROKER_SANDBOX_KEY") if sandbox else getenv("ALPACA_BROKER_LIVE_KEY"),
+        api_key=getenv("ALPACA_BROKER_SANDBOX_KEY")
+        if sandbox
+        else getenv("ALPACA_BROKER_LIVE_KEY"),
         secret_key=getenv("ALPACA_BROKER_SANDBOX_SECRET")
         if sandbox
         else getenv("ALPACA_BROKER_LIVE_SECRET"),

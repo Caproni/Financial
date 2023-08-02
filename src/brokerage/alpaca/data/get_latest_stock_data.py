@@ -16,9 +16,16 @@ def get_latest_stock_data(
     current = 0
     latest_stock_data = {}
     while current < len(symbols):
-        latest_stock_data.update(historical_stock_client.get_stock_latest_quote(
-            StockLatestQuoteRequest(
-                symbol_or_symbols=[s.replace("/", "") for s in symbols[current:min(current + pagination_limit, len(symbols))]]
+        latest_stock_data.update(
+            historical_stock_client.get_stock_latest_quote(
+                StockLatestQuoteRequest(
+                    symbol_or_symbols=[
+                        s.replace("/", "")
+                        for s in symbols[
+                            current : min(current + pagination_limit, len(symbols))
+                        ]
+                    ]
+                )
             )
-        ))
+        )
         current = min(current + pagination_limit, len(symbols))
