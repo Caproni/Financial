@@ -29,3 +29,5 @@ def get_latest_stock_data(
             )
         )
         current = min(current + pagination_limit, len(symbols))
+    
+    return latest_stock_data
