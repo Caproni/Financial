@@ -7,11 +7,15 @@ Copyright 2023
 from alpaca.data.historical.stock import StockHistoricalDataClient
 from alpaca.data.requests import StockLatestQuoteRequest
 
+from src.utils.logger import logger as log
+
 
 def get_latest_stock_data(
     historical_stock_client: StockHistoricalDataClient,
     symbols: list[str],
 ):
+    log.info("Calling get_latest_stock_data")
+
     pagination_limit = 2000
     current = 0
     latest_stock_data = {}
@@ -29,5 +33,5 @@ def get_latest_stock_data(
             )
         )
         current = min(current + pagination_limit, len(symbols))
-    
+
     return latest_stock_data

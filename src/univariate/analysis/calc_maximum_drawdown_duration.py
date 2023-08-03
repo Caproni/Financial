@@ -34,22 +34,22 @@ def calc_maximum_drawdown_duration(
     maximum_drawdown_duration_end_index = None
     mdd_duration = 0
     for i, datum in enumerate(data):
-        print(f"Index: {i} has value: {datum}")
+        log.debug(f"Index: {i} has value: {datum}")
         if i + 1 < len(data) - mdd_duration:
             proceeding = data[i + 1 :]  # all data after the current point
             for j, p in enumerate(proceeding, start=1):
-                print(f"Inner index: {j} has value: {p}")
+                log.debug(f"Inner index: {j} has value: {p}")
                 if p < datum and mdd_duration < j:
-                    print(f"Inner: {p} is less than outer: {datum}")
+                    log.debug(f"Inner: {p} is less than outer: {datum}")
                     mdd_duration = j
                     maximum_drawdown_duration_start_index = i
                     maximum_drawdown_duration_end_index = i + j
                 else:
                     break
 
-    print(f"MDD Duration start index: {maximum_drawdown_duration_start_index}")
-    print(f"MDD Duration end index: {maximum_drawdown_duration_end_index}")
-    print(f"MDD Duration: {mdd_duration}")
+    log.debug(f"MDD Duration start index: {maximum_drawdown_duration_start_index}")
+    log.debug(f"MDD Duration end index: {maximum_drawdown_duration_end_index}")
+    log.debug(f"MDD Duration: {mdd_duration}")
 
     return {
         "maximum_drawdown_duration_start_index": maximum_drawdown_duration_start_index,
