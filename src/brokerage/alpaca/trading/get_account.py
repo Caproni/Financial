@@ -5,6 +5,7 @@ Copyright 2023
 """
 
 from alpaca.broker.client import BrokerClient
+from requests.exceptions import ConnectionError
 
 from src.utils.logger import logger as log
 

@@ -7,6 +7,7 @@ Copyright 2023
 from datetime import timedelta
 from time import sleep
 from math import floor
+from statistics import median, stdev
 from alpaca.trading.enums import OrderType
 from alpaca.data.timeframe import TimeFrame, TimeFrameUnit
 from alpaca.trading.client import TradingClient
@@ -24,12 +25,8 @@ from src.brokerage.alpaca.trading.get_positions import get_positions
 from src.brokerage.alpaca.trading.get_orders import get_orders
 from alpaca.trading.requests import MarketOrderRequest
 from alpaca.trading.enums import OrderSide, TimeInForce
-from src.univariate.analysis.calc_maximum_drawdown_value import (
-    calc_maximum_drawdown_value,
-)
-from src.univariate.analysis.calc_maximum_drawdown_duration import (
-    calc_maximum_drawdown_duration
-)
+from src.univariate.analysis.get_drawups import get_drawups
+from src.univariate.analysis.get_drawdowns import get_drawdowns
 from src.strategies.intraday.common.close_positions_conditionally import (
     close_positions_conditionally,
 )
@@ -56,7 +53,7 @@ def runner(
     # declare objects
 
     short_timeframe = TimeFrame(
-        amount=5,
+        amount=15,
         unit=TimeFrameUnit.Minute,
     )
 
@@ -65,9 +62,9 @@ def runner(
     low_price_threshold = 5.0
     volume_price_threshold = 10_000_000
     market_close_cutoff_minutes = 3
-    profit_threshold_percentage = 0.15
-    drawdown_threshold_percentage = 5
-    drawdown_duration_threshold = timedelta(minutes=30)
+    profit_threshold_percentage = 0.03
+    stdev_threshold = 0.25
+    drawdown_threshold_percentage = 1
 
     # get data
 
@@ -105,13 +102,13 @@ def runner(
                 and mid_price > low_price_threshold
             ):
                 liquid_symbols.append(s)
-    
+
     log.info(
         f"{len(liquid_symbols)} of {len(symbols)} symbols are considered liquid enough for trading."
     )
 
     # filter out stocks with low volume of trade the previous trading day
-    
+
     snapshots = get_snapshots(
         historical_stock_client,
         sorted([s.symbol for s in liquid_symbols]),
@@ -131,11 +128,14 @@ def runner(
 
     # There is variability in the number of shortlisted symbols when this function is started multiple times within the same minute
 
-    log.info(f"Entering trading loop. Symbols:")
-    for s in shortlist_symbols:
-        log.info(f"{s}")
+    log.info(f"Entering trading loop.")
 
     while True:
+        
+        log.info(f"Trading on symbols:")
+        for s in shortlist_symbols:
+            log.info(f"{s.symbol}")
+        
         clock = get_clock(broker_client)
         log.info(f"Current market time: {clock.timestamp}")
 
@@ -154,15 +154,18 @@ def runner(
         current_orders = get_orders(trading_client)
 
         for p in current_positions:
-            if float(p.change_today) > profit_threshold_percentage or float(p.change_today) < 0:
-                log.info(f"Liquidating order: {p}")
-                close_position(
-                    trading_client,
-                    p.symbol,
-                )
-
-        log.info("Obtain historical data for new orders")
+            log.info(f"Liquidating order: {p}")
+            close_position(
+                trading_client,
+                p.symbol,
+            )
+    
+        log.info("Sleeping to avoid API limits")
         
+        sleep(10)
+
+        log.info("Obtaining historical data for new orders")
+
         short_timescale_stock_history = get_stock_bars(
             historical_stock_client,
             [s.symbol for s in shortlist_symbols],
@@ -176,43 +179,39 @@ def runner(
         new_orders: list[MarketOrderRequest] = []
         for s in shortlist_symbols:
             short_data = short_timescale_stock_history.data[s.symbol]
-            maximum_drawdown_value_percentage = calc_maximum_drawdown_value(
-                data=[d.vwap for d in short_data],
-            )["maximum_drawdown_value_percentage"]
-            mdd_duration = calc_maximum_drawdown_duration(
-                data=[d.vwap for d in short_data],
-                ts=[d.timestamp for d in short_data],
-            )
-            mdd_delta = mdd_duration["maximum_drawdown_duration_end_timestamp"] - mdd_duration["maximum_drawdown_duration_start_timestamp"]
-            if maximum_drawdown_value_percentage < drawdown_threshold_percentage and mdd_delta < drawdown_duration_threshold:
+            median_drawdown = median(get_drawdowns([s.vwap for s in short_data]))
+            median_drawup = median(get_drawups([s.vwap for s in short_data]))
+            if median_drawup - median_drawdown > drawdown_threshold_percentage and stdev([s.vwap for s in short_data]) > stdev_threshold:
                 qty = floor(
-                    cash * min(1, calc_kelly_bet(
-                            p_win=0.6,
-                            win_loss_ratio=1.1,
+                    cash
+                    * min(
+                        1,
+                        calc_kelly_bet(
+                            p_win=0.75,
+                            win_loss_ratio=median_drawup - median_drawdown,
                         ),
                     )
-                    / 2 / snapshots[s.symbol].latest_quote.ask_price)
-                side = OrderSide.BUY
-                order_type = OrderType.MARKET
-                if qty < 0:
-                    if not (s.shortable and s.easy_to_borrow):
-                        continue
-                    side = OrderSide.SELL
-                    order_type = OrderType.LIMIT
-
-                new_orders.append(
-                    MarketOrderRequest(
-                        symbol=s.symbol,
-                        qty=abs(qty),
-                        side=side,
-                        type=order_type,
-                        time_in_force=TimeInForce.DAY,
-                    )
+                    / 2
+                    / snapshots[s.symbol].latest_quote.ask_price
                 )
+                if qty > 0 and s.easy_to_borrow and s.shortable:
+                    new_orders.append(
+                        MarketOrderRequest(
+                            symbol=s.symbol,
+                            qty=qty,
+                            side=OrderSide.SELL,
+                            type=OrderType.MARKET,
+                            time_in_force=TimeInForce.DAY,
+                        )
+                    )
 
         # submit orders
 
-        if clock.is_open and clock.timestamp + timedelta(minutes=market_close_cutoff_minutes) < clock.next_close:
+        if (
+            clock.is_open
+            and clock.timestamp + timedelta(minutes=market_close_cutoff_minutes)
+            < clock.next_close
+        ):
             for new_order in new_orders:
                 log.info(f"Submitting order for {new_order.qty} shares of: {s}")
                 try:

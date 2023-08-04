@@ -25,7 +25,7 @@ def get_snapshots(
         dict[str, Snapshot]: A dictionary of snapshots
     """
     log.info("Calling get_snapshots")
-    
+
     pagination_limit = 20
     current = 0
     snapshots: dict[str, Snapshot] = {}
@@ -53,9 +53,7 @@ def get_snapshots(
             for err_sym in err_symbols:
                 try:
                     individual_snapshot = historical_stock_client.get_stock_snapshot(
-                        StockSnapshotRequest(
-                            symbol_or_symbols=[err_sym]
-                        )
+                        StockSnapshotRequest(symbol_or_symbols=[err_sym])
                     )
                     data.update(individual_snapshot)
                 except Exception as e:

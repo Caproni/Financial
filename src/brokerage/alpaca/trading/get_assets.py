@@ -6,6 +6,7 @@ Copyright 2023
 
 from alpaca.trading.client import TradingClient
 from alpaca.trading.requests import GetAssetsRequest
+from requests.exceptions import ConnectionError
 
 from src.utils.logger import logger as log
 

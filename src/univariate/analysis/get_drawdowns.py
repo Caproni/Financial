@@ -14,7 +14,7 @@ def get_drawdowns(
     """Gets a list of all drawdown values of a univariate timeseries.
 
     Args:
-        data (list[float | int]): The timeseries data for which to calculate the maximum drawdown value.
+        data (list[float | int]): The timeseries data for which to obtain drawdowns.
 
     Returns:
         dict[str, Any]: Dictionary describing the max drawdown value.
