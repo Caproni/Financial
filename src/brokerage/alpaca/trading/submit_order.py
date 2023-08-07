@@ -127,6 +127,7 @@ def submit_order(
             limit_price=limit_price,
         )
     else:  # order type not supported
+        log.critical(f"Order type: {order_type} not supported")
         raise RequestException(f"Order type: {order_type} not supported")
     
     # submit order

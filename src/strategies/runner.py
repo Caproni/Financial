@@ -23,7 +23,7 @@ from src.brokerage.alpaca.trading.submit_order import submit_order
 from src.brokerage.alpaca.trading.get_assets import get_assets
 from src.brokerage.alpaca.trading.get_positions import get_positions
 from src.brokerage.alpaca.trading.get_orders import get_orders
-from alpaca.trading.requests import MarketOrderRequest
+from alpaca.trading.requests import OrderRequest
 from alpaca.trading.enums import OrderSide, TimeInForce
 from src.univariate.analysis.get_drawups import get_drawups
 from src.univariate.analysis.get_drawdowns import get_drawdowns
@@ -94,11 +94,12 @@ def runner(
             bid_price = last_trade[s.symbol].bid_price
             if ask_price <= 0:
                 continue
-            bid_ask_spread = (ask_price - bid_price) / ask_price * 100
+            bid_ask_spread = ask_price - bid_price
+            bid_ask_spread_percentage = bid_ask_spread / ask_price * 100
             mid_price = (ask_price + bid_price) / 2
             if (
-                bid_ask_spread > market_lock_threshold
-                and bid_ask_spread < market_illiquidity_threshold
+                bid_ask_spread_percentage > market_lock_threshold
+                and bid_ask_spread_percentage < market_illiquidity_threshold
                 and mid_price > low_price_threshold
             ):
                 liquid_symbols.append(s)
@@ -107,30 +108,28 @@ def runner(
         f"{len(liquid_symbols)} of {len(symbols)} symbols are considered liquid enough for trading."
     )
 
-    # filter out stocks with low volume of trade the previous trading day
-
-    snapshots = get_snapshots(
-        historical_stock_client,
-        sorted([s.symbol for s in liquid_symbols]),
-    )
-
-    shortlist_symbols = []
-    for s in liquid_symbols:
-        if s.symbol in snapshots.keys():
-            volume = snapshots[s.symbol].previous_daily_bar.volume
-            vwap = snapshots[s.symbol].previous_daily_bar.vwap
-            if volume * vwap > volume_price_threshold:
-                shortlist_symbols.append(s)
-
-    log.info(
-        f"{len(shortlist_symbols)} of {len(symbols)} symbols are shortlisted for trading."
-    )
-
-    # There is variability in the number of shortlisted symbols when this function is started multiple times within the same minute
-
     log.info(f"Entering trading loop.")
 
     while True:
+        
+        # filter out stocks with low volume of trade the previous trading day
+
+        snapshots = get_snapshots(
+            historical_stock_client,
+            sorted([s.symbol for s in liquid_symbols]),
+        )
+
+        shortlist_symbols = []
+        for s in liquid_symbols:
+            if s.symbol in snapshots.keys():
+                volume = snapshots[s.symbol].previous_daily_bar.volume
+                vwap = snapshots[s.symbol].previous_daily_bar.vwap
+                if volume * vwap > volume_price_threshold:
+                    shortlist_symbols.append(s)
+
+        log.info(
+            f"{len(shortlist_symbols)} of {len(symbols)} symbols are shortlisted for trading."
+        )
         
         log.info(f"Trading on symbols:")
         for s in shortlist_symbols:
@@ -162,8 +161,6 @@ def runner(
     
         log.info("Sleeping to avoid API limits")
         
-        sleep(10)
-
         log.info("Obtaining historical data for new orders")
 
         short_timescale_stock_history = get_stock_bars(
@@ -176,9 +173,14 @@ def runner(
 
         # construct orders
 
-        new_orders: list[MarketOrderRequest] = []
+        new_orders: list[OrderRequest] = []
         for s in shortlist_symbols:
             short_data = short_timescale_stock_history.data[s.symbol]
+            last_trade = get_latest_stock_data(
+                historical_stock_client,
+                [s.symbol],
+            )
+            mid_price = (last_trade[s.symbol].ask_price + last_trade[s.symbol].bid_price) / 2
             median_drawdown = median(get_drawdowns([s.vwap for s in short_data]))
             median_drawup = median(get_drawups([s.vwap for s in short_data]))
             if median_drawup - median_drawdown > drawdown_threshold_percentage and stdev([s.vwap for s in short_data]) > stdev_threshold:
@@ -196,12 +198,13 @@ def runner(
                 )
                 if qty > 0 and s.easy_to_borrow and s.shortable:
                     new_orders.append(
-                        MarketOrderRequest(
+                        OrderRequest(
                             symbol=s.symbol,
                             qty=qty,
                             side=OrderSide.SELL,
-                            type=OrderType.MARKET,
+                            type=OrderType.LIMIT,
                             time_in_force=TimeInForce.DAY,
+                            limit_price=mid_price,
                         )
                     )
 
@@ -222,6 +225,7 @@ def runner(
                         side=new_order.side,
                         order_type=new_order.type,
                         time_in_force=new_order.time_in_force,
+                        limit_price=new_order.limit_price,
                     )
                     log.info(f"Submitted order for {new_order.qty} shares of: {s}")
                 except Exception as e:
