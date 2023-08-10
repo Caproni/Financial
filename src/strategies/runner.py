@@ -56,61 +56,79 @@ def runner(
         amount=15,
         unit=TimeFrameUnit.Minute,
     )
+    
+    rest_period = timedelta(minutes=15)
 
     market_lock_threshold = 0.00000001
     market_illiquidity_threshold = 10.0
     low_price_threshold = 5.0
     volume_price_threshold = 10_000_000
     market_close_cutoff_minutes = 3
-    profit_threshold_percentage = 0.03
     stdev_threshold = 0.25
     drawdown_threshold_percentage = 1
 
-    # get data
-
-    symbols = get_assets(trading_client)
-    clock = get_clock(broker_client)
-
-    # exclude non-tradable stocks
-
-    filtered_symbols = []
-    for s in symbols:
-        if s.tradable:
-            filtered_symbols.append(s)
-
-    # get prices and volumes of last trade
-
-    last_trade = get_latest_stock_data(
-        historical_stock_client,
-        sorted([s.symbol for s in filtered_symbols]),
-    )
-
-    # filter out low price and illiquid stocks
-
-    liquid_symbols = []
-    for s in filtered_symbols:
-        if s.symbol in last_trade.keys():
-            ask_price = last_trade[s.symbol].ask_price
-            bid_price = last_trade[s.symbol].bid_price
-            if ask_price <= 0:
-                continue
-            bid_ask_spread = ask_price - bid_price
-            bid_ask_spread_percentage = bid_ask_spread / ask_price * 100
-            mid_price = (ask_price + bid_price) / 2
-            if (
-                bid_ask_spread_percentage > market_lock_threshold
-                and bid_ask_spread_percentage < market_illiquidity_threshold
-                and mid_price > low_price_threshold
-            ):
-                liquid_symbols.append(s)
-
-    log.info(
-        f"{len(liquid_symbols)} of {len(symbols)} symbols are considered liquid enough for trading."
-    )
-
     log.info(f"Entering trading loop.")
+    
+    first_run = True
 
     while True:
+        
+        if first_run:
+            
+            # get data
+
+            symbols = get_assets(trading_client)
+            clock = get_clock(broker_client)
+
+            # exclude non-tradable stocks
+
+            filtered_symbols = []
+            for s in symbols:
+                if s.tradable:
+                    filtered_symbols.append(s)
+
+            # get prices and volumes of last trade
+
+            last_trade = get_latest_stock_data(
+                historical_stock_client,
+                sorted([s.symbol for s in filtered_symbols]),
+            )
+
+            # filter out low price and illiquid stocks
+
+            liquid_symbols = []
+            for s in filtered_symbols:
+                if s.symbol in last_trade.keys():
+                    ask_price = last_trade[s.symbol].ask_price
+                    bid_price = last_trade[s.symbol].bid_price
+                    if ask_price <= 0:
+                        continue
+                    bid_ask_spread = ask_price - bid_price
+                    bid_ask_spread_percentage = bid_ask_spread / ask_price * 100
+                    mid_price = (ask_price + bid_price) / 2
+                    if (
+                        bid_ask_spread_percentage > market_lock_threshold
+                        and bid_ask_spread_percentage < market_illiquidity_threshold
+                        and mid_price > low_price_threshold
+                    ):
+                        liquid_symbols.append(s)
+
+            log.info(
+                f"{len(liquid_symbols)} of {len(symbols)} symbols are considered liquid enough for trading."
+            )
+            
+            first_run = False
+        
+        clock = get_clock(broker_client)
+        log.info(f"Current market time: {clock.timestamp}")
+        
+        if not clock.is_open and clock.timestamp < clock.next_open:
+            log.info(
+                f"Market does not open until {clock.next_open}. Sleeping until then."
+            )
+            sleep((clock.next_open - clock.timestamp).seconds)
+            first_run = True
+            continue
         
         # filter out stocks with low volume of trade the previous trading day
 
@@ -134,18 +152,8 @@ def runner(
         log.info(f"Trading on symbols:")
         for s in shortlist_symbols:
             log.info(f"{s.symbol}")
-        
-        clock = get_clock(broker_client)
-        log.info(f"Current market time: {clock.timestamp}")
 
         cash = float(trading_client.get_account().cash)
-
-        if not clock.is_open and clock.timestamp + timedelta(hours=2) < clock.next_open:
-            log.info(
-                f"Market does not open until {clock.next_open}. Sleeping for one hour."
-            )
-            sleep(60 * 60)
-            continue
 
         log.info("Checking current positions / orders")
 
@@ -158,8 +166,6 @@ def runner(
                 trading_client,
                 p.symbol,
             )
-    
-        log.info("Sleeping to avoid API limits")
         
         log.info("Obtaining historical data for new orders")
 
@@ -231,9 +237,18 @@ def runner(
                 except Exception as e:
                     log.error(f"Could not submit order. Error: {e}")
                     continue
-
-        close_positions_conditionally(
-            broker_client=broker_client,
-            trading_client=trading_client,
-            within=timedelta(minutes=market_close_cutoff_minutes),
-        )
+        
+        if clock.is_open:
+            log.info("Sleeping until next trading period")
+            
+            if clock.timestamp + rest_period > clock.next_close:
+                log.info("Market closing soon. Closing positions.")
+                close_positions_conditionally(
+                    broker_client=broker_client,
+                    trading_client=trading_client,
+                    within=timedelta(minutes=rest_period.seconds // 60),
+                )
+            
+            minutes_until_next_period = (rest_period.seconds // 60) - clock.timestamp.minute % (rest_period.seconds // 60)
+            sleep(minutes_until_next_period * 60)
+            continue
