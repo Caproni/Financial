@@ -14,6 +14,7 @@ from alpaca.trading.client import TradingClient
 from alpaca.broker.client import BrokerClient
 from alpaca.data.live.stock import StockDataStream
 from alpaca.data.historical.stock import StockHistoricalDataClient
+from alpaca.trading.requests import LimitOrderRequest
 
 from src.brokerage.alpaca.broker.get_clock import get_clock
 from src.brokerage.alpaca.data.get_latest_stock_data import get_latest_stock_data
@@ -181,40 +182,68 @@ def runner(
 
         new_orders: list[OrderRequest] = []
         for s in shortlist_symbols:
+
             short_data = short_timescale_stock_history.data[s.symbol]
             last_trade = get_latest_stock_data(
                 historical_stock_client,
                 [s.symbol],
             )
+            
             mid_price = (last_trade[s.symbol].ask_price + last_trade[s.symbol].bid_price) / 2
-            median_drawdown = median(get_drawdowns([s.vwap for s in short_data]))
-            median_drawup = median(get_drawups([s.vwap for s in short_data]))
-            if median_drawup - median_drawdown > drawdown_threshold_percentage and stdev([s.vwap for s in short_data]) > stdev_threshold:
-                qty = floor(
-                    cash
-                    * min(
-                        1,
-                        calc_kelly_bet(
-                            p_win=0.75,
-                            win_loss_ratio=median_drawup - median_drawdown,
-                        ),
-                    )
-                    / 2
-                    / snapshots[s.symbol].latest_quote.ask_price
+            half_spread = (last_trade[s.symbol].ask_price - last_trade[s.symbol].bid_price) / 2
+            
+            drawdowns = get_drawdowns([s.vwap for s in short_data])
+            median_drawdown = median(drawdowns)
+            
+            drawups = get_drawups([s.vwap for s in short_data])
+            median_drawup = median(drawups)
+            
+            qty = floor(
+                cash
+                * min(
+                    1,
+                    calc_kelly_bet(
+                        p_win=0.75,
+                        win_loss_ratio=median_drawup - median_drawdown,
+                    ),
                 )
-                if qty > 0 and s.easy_to_borrow and s.shortable:
+                / 2
+                / snapshots[s.symbol].latest_quote.ask_price
+            )
+            
+            # regression / trending down
+            if (median_drawup - median_drawdown) > drawdown_threshold_percentage and stdev([s.vwap for s in short_data]) > stdev_threshold:
+                if qty < 0 and s.easy_to_borrow and s.shortable:
+                    log.info("Creating Limit Order for negative quantity")
                     new_orders.append(
-                        OrderRequest(
+                        LimitOrderRequest(
                             symbol=s.symbol,
                             qty=qty,
                             side=OrderSide.SELL,
                             type=OrderType.LIMIT,
                             time_in_force=TimeInForce.DAY,
-                            limit_price=mid_price,
+                            limit_price=round(100 * (mid_price - 3 * half_spread / 2)) / 100,
+                        )
+                    )
+            
+            # regression / trending up
+            if (median_drawdown - median_drawup) > drawdown_threshold_percentage and stdev([s.vwap for s in short_data]) > stdev_threshold:
+                if qty > 0:
+                    log.info("Creating Limit Order for positive quantity")
+                    new_orders.append(
+                        LimitOrderRequest(
+                            symbol=s.symbol,
+                            qty=qty,
+                            side=OrderSide.BUY,
+                            type=OrderType.LIMIT,
+                            time_in_force=TimeInForce.DAY,
+                            limit_price=round(100 * (mid_price + 3 * half_spread / 2)) / 100,
                         )
                     )
 
         # submit orders
+
+        clock = get_clock(broker_client)
 
         if (
             clock.is_open
@@ -237,6 +266,8 @@ def runner(
                 except Exception as e:
                     log.error(f"Could not submit order. Error: {e}")
                     continue
+        
+        clock = get_clock(broker_client)
         
         if clock.is_open:
             log.info("Sleeping until next trading period")
