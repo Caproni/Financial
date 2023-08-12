@@ -23,7 +23,7 @@ def get_assets(
     Args:
         client (TradingClient): An Alpaca trading client
         status (str, optional): Filters on asset status. Defaults to None.
-        asset_class (str, optional): Filter on asset class. Defaults to None.
+        asset_class (str, optional): Filter on asset class. "crypto" or "us_equity". Defaults to None.
         exchange (str, optional): Filter on exchange. Defaults to None.
 
     Returns:

@@ -78,14 +78,18 @@ def runner(
             
             # get data
 
-            symbols = get_assets(trading_client)
+            symbols = get_assets(
+                trading_client,
+                asset_class="us_equity",
+            )
+            
             clock = get_clock(broker_client)
 
             # exclude non-tradable stocks
 
             filtered_symbols = []
             for s in symbols:
-                if s.tradable:
+                if s.tradable and s.status:
                     filtered_symbols.append(s)
 
             # get prices and volumes of last trade

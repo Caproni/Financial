@@ -34,12 +34,21 @@ def get_stock_bars(
         BarSet: Historical dataset
     """
     log.info("Calling get_stock_bars")
-    return client.get_stock_bars(
-        StockBarsRequest(
-            symbol_or_symbols=symbols,
-            start=start,
-            end=end,
-            timeframe=timeframe,
-            adjustment=Adjustment.ALL,
+    
+    all_symbol_data = {}
+    for symbol in symbols:
+        symbol_data = client.get_stock_bars(
+            request_params=StockBarsRequest(
+                symbol_or_symbols=symbol,
+                start=start,
+                end=end,
+                limit=None,
+                timeframe=timeframe,
+                adjustment=Adjustment.ALL,
+            )
         )
-    )
+        all_symbol_data.update(
+            symbol_data
+        )
+    
+    return all_symbol_data

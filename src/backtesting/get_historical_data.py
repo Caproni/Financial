@@ -4,25 +4,34 @@ Author: Edmund Bennett
 Copyright 2023
 """
 
+from datetime import datetime
+from alpaca.trading.client import TradingClient
 from alpaca.data.historical.stock import StockHistoricalDataClient
-from alpaca.data.requests import StockBarsRequest
+from alpaca.data.timeframe import TimeFrame, TimeFrameUnit
 
+from src.brokerage.alpaca.trading.get_assets import get_assets
+from src.brokerage.alpaca.data.get_stock_bars import get_stock_bars
 from src.utils.logger import logger as log
 
 
 def get_historical_data(
+    trading_client: TradingClient,
     historical_data_client: StockHistoricalDataClient,
-    symbols: list[str],
 ):
     log.info("Calling get_historical_data")
     
-    historical_data_client.get_stock_bars(
-        StockBarsRequest(
-            symbol_or_symbols=symbols,
-            start (Optional[datetime]): The beginning of the time interval for desired data. Timezone naive inputs assumed to be in UTC.
-            end (Optional[datetime]): The end of the time interval for desired data. Defaults to now. Timezone naive inputs assumed to be in UTC.
-            limit=None,
-            adjustment (Optional[Adjustment]): The type of corporate action data normalization.
-            feed (Optional[DataFeed]): The stock data feed to retrieve from.
-        )
+    historical_assets = get_assets(
+        trading_client,
+        asset_class="us_equity",
+    )
+        
+    return get_stock_bars(
+        historical_data_client,
+        symbols=[s.symbol for s in historical_assets],
+        timeframe=TimeFrame(
+            amount=15,
+            unit=TimeFrameUnit.Minute,
+        ),
+        start=datetime(2023, 1, 9, 16, 0, 0),
+        end=None,
     )
