@@ -5,7 +5,13 @@ Copyright 2023
 """
 
 from alpaca.trading.client import TradingClient
-from alpaca.trading.requests import MarketOrderRequest, LimitOrderRequest, StopOrderRequest, TrailingStopOrderRequest, StopLimitOrderRequest
+from alpaca.trading.requests import (
+    MarketOrderRequest,
+    LimitOrderRequest,
+    StopOrderRequest,
+    TrailingStopOrderRequest,
+    StopLimitOrderRequest,
+)
 from alpaca.trading.enums import OrderSide, TimeInForce, OrderType, OrderClass
 from alpaca.trading.models import Order
 from requests.exceptions import ConnectionError, RequestException
@@ -42,9 +48,9 @@ def submit_order(
         Order: A submitted order.
     """
     log.info("Calling submit_order")
-    
+
     # create order
-    
+
     if order_type == OrderType.MARKET:
         log.debug("Order is a Market Order")
         order = MarketOrderRequest(
@@ -63,7 +69,9 @@ def submit_order(
         log.debug("Order is a Limit Order")
         if limit_price is None:
             log.critical("Limit Order attempted but limit_price parameter is None")
-            raise RequestException("Limit Order attempted but limit_price parameter is None")
+            raise RequestException(
+                "Limit Order attempted but limit_price parameter is None"
+            )
         order = LimitOrderRequest(
             symbol=symbol,
             qty=quantity,
@@ -81,7 +89,9 @@ def submit_order(
         log.debug("Order is a Stop Order")
         if stop_price is None:
             log.critical("Limit Order attempted but stop_price parameter is None")
-            raise RequestException("Limit Order attempted but stop_price parameter is None")
+            raise RequestException(
+                "Limit Order attempted but stop_price parameter is None"
+            )
         order = StopOrderRequest(
             symbol=symbol,
             qty=quantity,
@@ -129,13 +139,11 @@ def submit_order(
     else:  # order type not supported
         log.critical(f"Order type: {order_type} not supported")
         raise RequestException(f"Order type: {order_type} not supported")
-    
+
     # submit order
 
     try:
-        return client.submit_order(
-            order_data=order
-        )
+        return client.submit_order(order_data=order)
     except ConnectionError as ce:
         log.warning(f"Connection Error: {ce}")
         try:
@@ -143,6 +151,6 @@ def submit_order(
                 symbol_or_asset_id=symbol,
             )
         except ConnectionError as ce2:
-            log.error(f"Second Connection Error: {ce2}") 
+            log.error(f"Second Connection Error: {ce2}")
     except Exception as e:
         log.error(f"{e}")

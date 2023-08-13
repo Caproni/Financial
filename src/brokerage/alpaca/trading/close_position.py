@@ -32,4 +32,4 @@ def close_position(
                 symbol_or_asset_id=symbol,
             )
         except ConnectionError as e:
-            log.error(f"Second Connection Error: {e}")    
+            log.error(f"Second Connection Error: {e}")

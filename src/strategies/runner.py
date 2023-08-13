@@ -28,6 +28,7 @@ from alpaca.trading.requests import OrderRequest
 from alpaca.trading.enums import OrderSide, TimeInForce
 from src.univariate.analysis.get_drawups import get_drawups
 from src.univariate.analysis.get_drawdowns import get_drawdowns
+from src.univariate.analysis.calc_hurst_exponent import calc_hurst_exponent
 from src.strategies.intraday.common.close_positions_conditionally import (
     close_positions_conditionally,
 )
@@ -57,7 +58,7 @@ def runner(
         amount=15,
         unit=TimeFrameUnit.Minute,
     )
-    
+
     rest_period = timedelta(minutes=15)
 
     market_lock_threshold = 0.00000001
@@ -67,22 +68,21 @@ def runner(
     market_close_cutoff_minutes = 3
     stdev_threshold = 0.25
     drawdown_threshold_percentage = 1
+    hurst_threshold = 0.5
 
     log.info(f"Entering trading loop.")
-    
+
     first_run = True
 
     while True:
-        
         if first_run:
-            
             # get data
 
             symbols = get_assets(
                 trading_client,
                 asset_class="us_equity",
             )
-            
+
             clock = get_clock(broker_client)
 
             # exclude non-tradable stocks
@@ -121,12 +121,12 @@ def runner(
             log.info(
                 f"{len(liquid_symbols)} of {len(symbols)} symbols are considered liquid enough for trading."
             )
-            
+
             first_run = False
-        
+
         clock = get_clock(broker_client)
         log.info(f"Current market time: {clock.timestamp}")
-        
+
         if not clock.is_open and clock.timestamp < clock.next_open:
             log.info(
                 f"Market does not open until {clock.next_open}. Sleeping until then."
@@ -134,7 +134,7 @@ def runner(
             sleep((clock.next_open - clock.timestamp).seconds)
             first_run = True
             continue
-        
+
         # filter out stocks with low volume of trade the previous trading day
 
         snapshots = get_snapshots(
@@ -153,7 +153,7 @@ def runner(
         log.info(
             f"{len(shortlist_symbols)} of {len(symbols)} symbols are shortlisted for trading."
         )
-        
+
         log.info(f"Trading on symbols:")
         for s in shortlist_symbols:
             log.info(f"{s.symbol}")
@@ -171,7 +171,7 @@ def runner(
                 trading_client,
                 p.symbol,
             )
-        
+
         log.info("Obtaining historical data for new orders")
 
         short_timescale_stock_history = get_stock_bars(
@@ -186,37 +186,45 @@ def runner(
 
         new_orders: list[OrderRequest] = []
         for s in shortlist_symbols:
-
             short_data = short_timescale_stock_history.data[s.symbol]
+            short_vwap = [s.vwap for s in short_data]
             last_trade = get_latest_stock_data(
                 historical_stock_client,
                 [s.symbol],
             )
-            
-            mid_price = (last_trade[s.symbol].ask_price + last_trade[s.symbol].bid_price) / 2
-            half_spread = (last_trade[s.symbol].ask_price - last_trade[s.symbol].bid_price) / 2
-            
-            drawdowns = get_drawdowns([s.vwap for s in short_data])
+
+            mid_price = (
+                last_trade[s.symbol].ask_price + last_trade[s.symbol].bid_price
+            ) / 2
+            half_spread = (
+                last_trade[s.symbol].ask_price - last_trade[s.symbol].bid_price
+            ) / 2
+
+            drawdowns = get_drawdowns(short_vwap)
             median_drawdown = median(drawdowns)
-            
-            drawups = get_drawups([s.vwap for s in short_data])
+
+            drawups = get_drawups(short_vwap)
             median_drawup = median(drawups)
-            
+
             qty = floor(
                 cash
                 * min(
                     1,
                     calc_kelly_bet(
-                        p_win=0.75,
+                        p_win=1 - calc_hurst_exponent(short_vwap),
                         win_loss_ratio=median_drawup - median_drawdown,
                     ),
                 )
                 / 2
                 / snapshots[s.symbol].latest_quote.ask_price
             )
-            
+
             # regression / trending down
-            if (median_drawup - median_drawdown) > drawdown_threshold_percentage and stdev([s.vwap for s in short_data]) > stdev_threshold:
+            if (
+                median_drawup - median_drawdown
+            ) > drawdown_threshold_percentage and stdev(
+                [s.vwap for s in short_data]
+            ) > stdev_threshold:
                 if qty < 0 and s.easy_to_borrow and s.shortable:
                     log.info("Creating Limit Order for negative quantity")
                     new_orders.append(
@@ -226,12 +234,17 @@ def runner(
                             side=OrderSide.SELL,
                             type=OrderType.LIMIT,
                             time_in_force=TimeInForce.DAY,
-                            limit_price=round(100 * (mid_price - 3 * half_spread / 2)) / 100,
+                            limit_price=round(100 * (mid_price - 3 * half_spread / 2))
+                            / 100,
                         )
                     )
-            
+
             # regression / trending up
-            if (median_drawdown - median_drawup) > drawdown_threshold_percentage and stdev([s.vwap for s in short_data]) > stdev_threshold:
+            if (
+                median_drawdown - median_drawup
+            ) > drawdown_threshold_percentage and stdev(
+                [s.vwap for s in short_data]
+            ) > stdev_threshold:
                 if qty > 0:
                     log.info("Creating Limit Order for positive quantity")
                     new_orders.append(
@@ -241,7 +254,8 @@ def runner(
                             side=OrderSide.BUY,
                             type=OrderType.LIMIT,
                             time_in_force=TimeInForce.DAY,
-                            limit_price=round(100 * (mid_price + 3 * half_spread / 2)) / 100,
+                            limit_price=round(100 * (mid_price + 3 * half_spread / 2))
+                            / 100,
                         )
                     )
 
@@ -270,12 +284,12 @@ def runner(
                 except Exception as e:
                     log.error(f"Could not submit order. Error: {e}")
                     continue
-        
+
         clock = get_clock(broker_client)
-        
+
         if clock.is_open:
             log.info("Sleeping until next trading period")
-            
+
             if clock.timestamp + rest_period > clock.next_close:
                 log.info("Market closing soon. Closing positions.")
                 close_positions_conditionally(
@@ -283,7 +297,9 @@ def runner(
                     trading_client=trading_client,
                     within=timedelta(minutes=rest_period.seconds // 60),
                 )
-            
-            minutes_until_next_period = (rest_period.seconds // 60) - clock.timestamp.minute % (rest_period.seconds // 60)
+
+            minutes_until_next_period = (
+                rest_period.seconds // 60
+            ) - clock.timestamp.minute % (rest_period.seconds // 60)
             sleep(minutes_until_next_period * 60)
             continue

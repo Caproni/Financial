@@ -9,6 +9,7 @@ from alpaca.data.requests import StockBarsRequest
 from alpaca.data.enums import Adjustment
 from alpaca.data.timeframe import TimeFrame
 from alpaca.data.models import BarSet
+from alpaca.common.exceptions import APIError
 from datetime import datetime
 
 from src.utils.logger import logger as log
@@ -34,21 +35,24 @@ def get_stock_bars(
         BarSet: Historical dataset
     """
     log.info("Calling get_stock_bars")
-    
+
     all_symbol_data = {}
     for symbol in symbols:
-        symbol_data = client.get_stock_bars(
-            request_params=StockBarsRequest(
-                symbol_or_symbols=symbol,
-                start=start,
-                end=end,
-                limit=None,
-                timeframe=timeframe,
-                adjustment=Adjustment.ALL,
+        try:
+            symbol_data = client.get_stock_bars(
+                request_params=StockBarsRequest(
+                    symbol_or_symbols=symbol,
+                    start=start,
+                    end=end,
+                    limit=None,
+                    timeframe=timeframe,
+                    adjustment=Adjustment.ALL,
+                )
             )
-        )
-        all_symbol_data.update(
-            symbol_data
-        )
-    
+            all_symbol_data.update(symbol_data.data)
+        except AttributeError as e:
+            log.warning(f"No data for symbol: {symbol}. Error: {e}")
+        except APIError as e:
+            log.warning(f"Symbol not recognized: {symbol}. Error: {e}")
+
     return all_symbol_data

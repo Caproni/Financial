@@ -16,22 +16,24 @@ from src.utils.logger import logger as log
 
 def get_historical_data(
     trading_client: TradingClient,
-    historical_data_client: StockHistoricalDataClient,
+    historical_stock_client: StockHistoricalDataClient,
+    start: datetime | None = None,
+    end: datetime | None = None,
 ):
     log.info("Calling get_historical_data")
-    
+
     historical_assets = get_assets(
         trading_client,
         asset_class="us_equity",
     )
-        
+
     return get_stock_bars(
-        historical_data_client,
-        symbols=[s.symbol for s in historical_assets],
+        historical_stock_client,
+        symbols=sorted([s.symbol for s in historical_assets]),
         timeframe=TimeFrame(
             amount=15,
             unit=TimeFrameUnit.Minute,
         ),
-        start=datetime(2023, 1, 9, 16, 0, 0),
-        end=None,
+        start=start,
+        end=end,
     )
