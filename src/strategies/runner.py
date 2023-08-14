@@ -197,12 +197,12 @@ def runner(
             mid_price = (
                 last_trade[s.symbol].ask_price + last_trade[s.symbol].bid_price
             ) / 2
-            half_spread = (
+            spread = (
                 last_trade[s.symbol].ask_price - last_trade[s.symbol].bid_price
-            ) / 2
+            )
             
             log.info(f"Midprice: {mid_price}")
-            log.info(f"Spread: {2 * half_spread}")
+            log.info(f"Spread: {spread}")
 
             drawdowns = get_drawdowns(short_vwap)
             median_drawdown = median(drawdowns)
@@ -241,7 +241,7 @@ def runner(
                             side=OrderSide.SELL,
                             type=OrderType.LIMIT,
                             time_in_force=TimeInForce.DAY,
-                            limit_price=round(100 * (mid_price - 3 * half_spread / 2))
+                            limit_price=round(100 * (mid_price - spread))
                             / 100,
                         )
                     )
@@ -261,7 +261,7 @@ def runner(
                             side=OrderSide.BUY,
                             type=OrderType.LIMIT,
                             time_in_force=TimeInForce.DAY,
-                            limit_price=round(100 * (mid_price + 3 * half_spread / 2))
+                            limit_price=round(100 * (mid_price + spread))
                             / 100,
                         )
                     )

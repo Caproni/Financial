@@ -5,6 +5,7 @@ Copyright 2023
 """
 
 from statistics import stdev
+from math import log10
 
 from ...utils.logger import logger as log
 
@@ -28,8 +29,7 @@ def calc_hurst_exponent(
 
     data_av = sum(data) / N
     normed_data = [d - data_av for d in data]
-    zs = [sum(normed_data[: i + 1]) for i in range(N)]
-    r = [max(zs[: i + 1]) - min(zs[: i + 1]) for i in range(N)]
-    return 0.25
-    st_devs = [stdev(data[:i]) for i in range(N - 1)]
-    return [r[i] / st_devs[i] for i in range(N)]  # TODO: fix!
+    zs = [sum(normed_data[i: ]) for i in range(N - 4)]
+    rs = [max(zs[i:]) - min(zs[i:]) for i in range(N-4)]
+    ss = [stdev(data[i:]) for i in range(N-4)]
+    return sum([(log10(r+1) - log10(s)) / log10(N-4) for r, s in zip(rs, ss)]) / N
