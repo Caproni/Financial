@@ -30,5 +30,6 @@ def calc_hurst_exponent(
     normed_data = [d - data_av for d in data]
     zs = [sum(normed_data[: i + 1]) for i in range(N)]
     r = [max(zs[: i + 1]) - min(zs[: i + 1]) for i in range(N)]
-    st_devs = [stdev(data[:i + 1]) for i in range(N)]
+    return 0.25
+    st_devs = [stdev(data[:i]) for i in range(N - 1)]
     return [r[i] / st_devs[i] for i in range(N)]  # TODO: fix!

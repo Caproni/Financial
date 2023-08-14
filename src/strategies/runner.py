@@ -178,7 +178,7 @@ def runner(
             historical_stock_client,
             [s.symbol for s in shortlist_symbols],
             timeframe=short_timeframe,
-            start=clock.timestamp - timedelta(days=1),
+            start=clock.timestamp - (timedelta(days=3 if clock.timestamp.weekday() == 0 else 1)),
             end=None,
         )
 
@@ -186,7 +186,8 @@ def runner(
 
         new_orders: list[OrderRequest] = []
         for s in shortlist_symbols:
-            short_data = short_timescale_stock_history.data[s.symbol]
+            log.info(f"Symbol: {s}")
+            short_data = short_timescale_stock_history[s.symbol]
             short_vwap = [s.vwap for s in short_data]
             last_trade = get_latest_stock_data(
                 historical_stock_client,
@@ -199,12 +200,18 @@ def runner(
             half_spread = (
                 last_trade[s.symbol].ask_price - last_trade[s.symbol].bid_price
             ) / 2
+            
+            log.info(f"Midprice: {mid_price}")
+            log.info(f"Spread: {2 * half_spread}")
 
             drawdowns = get_drawdowns(short_vwap)
             median_drawdown = median(drawdowns)
 
             drawups = get_drawups(short_vwap)
             median_drawup = median(drawups)
+            
+            log.info(f"Median drawdown: {median_drawdown}")
+            log.info(f"Median drawup: {median_drawup}")
 
             qty = floor(
                 cash
