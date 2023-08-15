@@ -15,6 +15,7 @@ from alpaca.broker.client import BrokerClient
 from alpaca.data.live.stock import StockDataStream
 from alpaca.data.historical.stock import StockHistoricalDataClient
 from alpaca.trading.requests import LimitOrderRequest
+from hurst import compute_Hc
 
 from src.brokerage.alpaca.broker.get_clock import get_clock
 from src.brokerage.alpaca.data.get_latest_stock_data import get_latest_stock_data
@@ -28,7 +29,6 @@ from alpaca.trading.requests import OrderRequest
 from alpaca.trading.enums import OrderSide, TimeInForce
 from src.univariate.analysis.get_drawups import get_drawups
 from src.univariate.analysis.get_drawdowns import get_drawdowns
-from src.univariate.analysis.calc_hurst_exponent import calc_hurst_exponent
 from src.strategies.intraday.common.close_positions_conditionally import (
     close_positions_conditionally,
 )
@@ -212,13 +212,18 @@ def runner(
             
             log.info(f"Median drawdown: {median_drawdown}")
             log.info(f"Median drawup: {median_drawup}")
+            
+            hurst_exponent, _, _ = compute_Hc(
+                short_vwap,
+                kind="price",
+            )
 
             qty = floor(
                 cash
                 * min(
                     1,
                     calc_kelly_bet(
-                        p_win=1 - calc_hurst_exponent(short_vwap),
+                        p_win=1 - hurst_exponent,
                         win_loss_ratio=median_drawup - median_drawdown,
                     ),
                 )
