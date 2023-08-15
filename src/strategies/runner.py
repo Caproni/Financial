@@ -68,7 +68,7 @@ def runner(
     market_close_cutoff_minutes = 3
     stdev_threshold = 0.25
     drawdown_threshold_percentage = 1
-    hurst_threshold = 0.5
+    hurst_threshold = 0.6
 
     log.info(f"Entering trading loop.")
 
@@ -178,7 +178,7 @@ def runner(
             historical_stock_client,
             [s.symbol for s in shortlist_symbols],
             timeframe=short_timeframe,
-            start=clock.timestamp - (timedelta(days=3 if clock.timestamp.weekday() == 0 else 1)),
+            start=clock.timestamp - (timedelta(days=7)),
             end=None,
         )
 
@@ -217,27 +217,29 @@ def runner(
                 short_vwap,
                 kind="price",
             )
+            
+            log.info(f"Hurst exponent: {hurst_exponent}")
 
             qty = floor(
                 cash
                 * min(
                     1,
                     calc_kelly_bet(
-                        p_win=1 - hurst_exponent,
+                        p_win=1 + hurst_threshold - hurst_exponent,
                         win_loss_ratio=median_drawup - median_drawdown,
                     ),
                 )
                 / 2
                 / snapshots[s.symbol].latest_quote.ask_price
             )
+            
+            log.info(f"Potential trading quantity: {qty}")
 
             # regression / trending down
             if (
-                median_drawup - median_drawdown
-            ) > drawdown_threshold_percentage and stdev(
-                [s.vwap for s in short_data]
-            ) > stdev_threshold:
-                if qty < 0 and s.easy_to_borrow and s.shortable:
+                median_drawdown - median_drawup
+            ) > drawdown_threshold_percentage and hurst_exponent < hurst_threshold:
+                if qty > 0 and s.easy_to_borrow and s.shortable:
                     log.info("Creating Limit Order for negative quantity")
                     new_orders.append(
                         LimitOrderRequest(
@@ -253,10 +255,8 @@ def runner(
 
             # regression / trending up
             if (
-                median_drawdown - median_drawup
-            ) > drawdown_threshold_percentage and stdev(
-                [s.vwap for s in short_data]
-            ) > stdev_threshold:
+                median_drawup - median_drawdown
+            ) > drawdown_threshold_percentage and hurst_exponent < hurst_threshold:
                 if qty > 0:
                     log.info("Creating Limit Order for positive quantity")
                     new_orders.append(
