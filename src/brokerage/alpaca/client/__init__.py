@@ -10,5 +10,5 @@ from src.brokerage.alpaca.client.create_market_data_client import (
     create_historical_stock_data_client,
     create_live_stock_data_client,
     create_historical_crypto_data_client,
-    create_live_crypto_data_client
+    create_live_crypto_data_client,
 )

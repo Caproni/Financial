@@ -197,10 +197,8 @@ def runner(
             mid_price = (
                 last_trade[s.symbol].ask_price + last_trade[s.symbol].bid_price
             ) / 2
-            spread = (
-                last_trade[s.symbol].ask_price - last_trade[s.symbol].bid_price
-            )
-            
+            spread = last_trade[s.symbol].ask_price - last_trade[s.symbol].bid_price
+
             log.info(f"Midprice: {mid_price}")
             log.info(f"Spread: {spread}")
 
@@ -209,15 +207,15 @@ def runner(
 
             drawups = get_drawups(short_vwap)
             median_drawup = median(drawups)
-            
+
             log.info(f"Median drawdown: {median_drawdown}")
             log.info(f"Median drawup: {median_drawup}")
-            
+
             hurst_exponent, _, _ = compute_Hc(
                 short_vwap,
                 kind="price",
             )
-            
+
             log.info(f"Hurst exponent: {hurst_exponent}")
 
             qty = floor(
@@ -232,7 +230,7 @@ def runner(
                 / 2
                 / snapshots[s.symbol].latest_quote.ask_price
             )
-            
+
             log.info(f"Potential trading quantity: {qty}")
 
             # regression / trending down
@@ -248,8 +246,7 @@ def runner(
                             side=OrderSide.SELL,
                             type=OrderType.LIMIT,
                             time_in_force=TimeInForce.DAY,
-                            limit_price=round(100 * (mid_price - spread))
-                            / 100,
+                            limit_price=round(100 * (mid_price - spread)) / 100,
                         )
                     )
 
@@ -266,8 +263,7 @@ def runner(
                             side=OrderSide.BUY,
                             type=OrderType.LIMIT,
                             time_in_force=TimeInForce.DAY,
-                            limit_price=round(100 * (mid_price + spread))
-                            / 100,
+                            limit_price=round(100 * (mid_price + spread)) / 100,
                         )
                     )
 
