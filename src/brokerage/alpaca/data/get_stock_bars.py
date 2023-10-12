@@ -36,7 +36,7 @@ def get_stock_bars(
     """
     log.info("Calling get_stock_bars")
 
-    all_symbol_data = {}
+    all_symbol_data: BarSet = {}
     for symbol in symbols:
         try:
             symbol_data = client.get_stock_bars(

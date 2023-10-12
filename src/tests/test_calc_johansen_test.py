@@ -18,7 +18,5 @@ def test_calc_johansen_test():
         lag=0,
     )
     
-    assert result.lr1
-    assert result.cvm
-    assert result.summary()
-    
+    assert result.lr1.size == 2
+    assert result.cvm.size == 6
