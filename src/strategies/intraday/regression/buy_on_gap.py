@@ -158,7 +158,7 @@ def buy_on_gap(
             amount=1,
             unit=TimeFrameUnit.Day,
         ),
-        start=clock.timestamp - (timedelta(days=1)),
+        start=clock.timestamp - (timedelta(days=3 if clock.timestamp.get_weekday() == 0 else 1)),
         end=None,
     )
     
