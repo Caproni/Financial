@@ -7,7 +7,7 @@ Copyright 2023
 from datetime import timedelta
 from time import sleep
 from math import floor
-from statistics import median, stdev
+from statistics import median
 from alpaca.trading.enums import OrderType
 from alpaca.data.timeframe import TimeFrame, TimeFrameUnit
 from alpaca.trading.client import TradingClient
@@ -15,6 +15,8 @@ from alpaca.broker.client import BrokerClient
 from alpaca.data.live.stock import StockDataStream
 from alpaca.data.historical.stock import StockHistoricalDataClient
 from alpaca.trading.requests import LimitOrderRequest
+from alpaca.trading.requests import OrderRequest
+from alpaca.trading.enums import OrderSide, TimeInForce
 from hurst import compute_Hc
 
 from src.brokerage.alpaca.broker.get_clock import get_clock
@@ -25,8 +27,6 @@ from src.brokerage.alpaca.trading.submit_order import submit_order
 from src.brokerage.alpaca.trading.get_assets import get_assets
 from src.brokerage.alpaca.trading.get_positions import get_positions
 from src.brokerage.alpaca.trading.get_orders import get_orders
-from alpaca.trading.requests import OrderRequest
-from alpaca.trading.enums import OrderSide, TimeInForce
 from src.univariate.analysis.get_drawups import get_drawups
 from src.univariate.analysis.get_drawdowns import get_drawdowns
 from src.strategies.intraday.common.close_positions_conditionally import (
@@ -66,7 +66,6 @@ def runner(
     low_price_threshold = 5.0
     volume_price_threshold = 10_000_000
     market_close_cutoff_minutes = 3
-    stdev_threshold = 0.25
     drawdown_threshold_percentage = 1
     hurst_threshold = 0.6
 
