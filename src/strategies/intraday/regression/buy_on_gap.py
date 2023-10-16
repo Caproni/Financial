@@ -201,9 +201,11 @@ def buy_on_gap(
         sorted([s.symbol for s in selected_gapped_down_stocks]),
     )
     
+    log.info(f"Total of: {len(selected_gapped_down_stocks)} stocks to purchase.")
+    
     for selected_stock in selected_gapped_down_stocks:
         ask_price = snapshots.get(s.symbol).latest_quote.ask_price
-        quantity = floor(cash / ask_price / len(selected_stocks))
+        quantity = floor(cash / ask_price / len(selected_gapped_down_stocks))
         log.info(f"Submitting order for {quantity} shares of: {selected_stock.symbol}")
         try:
             submit_order(
