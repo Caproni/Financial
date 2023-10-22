@@ -170,6 +170,8 @@ def buy_on_gap(
     
     selected_gapped_down_stocks: list[Asset] = []
     selected_gapped_down_stock_returns: list[float] = []
+    selected_gapped_up_stocks: list[Asset] = []
+    selected_gapped_up_stock_returns: list[float] = []
     for s in liquid_symbols:
         log.info(f"Processing: {s.symbol}")
         if s.symbol in data_available_stocks:
@@ -182,11 +184,18 @@ def buy_on_gap(
                 if gap > sd and today_open > average:  # seeking stocks which gap down more than a specific amount and whose prices are currently trending high
                     selected_gapped_down_stocks.append(s)
                     selected_gapped_down_stock_returns(gap)
+                if gap < -sd and today_open < average:  # seeking stocks which gap up more than a specific amount and whose prices are currently trending low
+                    selected_gapped_up_stocks.append(s)
+                    selected_gapped_up_stock_returns(-gap)
     
     selected_gapped_down_stocks = [x for _, x in sorted(zip(selected_gapped_down_stock_returns, selected_gapped_down_stocks))]
+    selected_gapped_up_stocks = [x for _, x in sorted(zip(selected_gapped_up_stock_returns, selected_gapped_up_stocks))]
 
     if len(selected_gapped_down_stocks) > 10:
         selected_gapped_down_stocks = selected_gapped_down_stocks[0:10]
+    
+    if len(selected_gapped_up_stocks) > 10:
+        selected_gapped_up_stocks = selected_gapped_up_stocks[0:10]
     
     log.info("Updating clock...")
 
@@ -205,8 +214,8 @@ def buy_on_gap(
     
     for selected_stock in selected_gapped_down_stocks:
         ask_price = snapshots.get(s.symbol).latest_quote.ask_price
-        quantity = floor(cash / ask_price / len(selected_gapped_down_stocks))
-        log.info(f"Submitting order for {quantity} shares of: {selected_stock.symbol}")
+        quantity = floor(cash / ask_price / (len(selected_gapped_down_stocks) + len(selected_gapped_up_stocks)))
+        log.info(f"Submitting long order for {quantity} shares of: {selected_stock.symbol}")
         try:
             submit_order(
                 trading_client,
@@ -216,7 +225,26 @@ def buy_on_gap(
                 order_type=OrderType.MARKET,
                 time_in_force=TimeInForce.DAY,
             )
-            log.info(f"Submitted order for {quantity} shares of: {selected_stock.symbol}")
+            log.info(f"Submitted long order for {quantity} shares of: {selected_stock.symbol}")
+        except Exception as e:
+            log.error(f"Could not submit order. Error: {e}")
+    
+    log.info(f"Total of: {len(selected_gapped_up_stocks)} stocks to short.")
+
+    for selected_stock in selected_gapped_up_stocks:
+        ask_price = snapshots.get(s.symbol).latest_quote.ask_price
+        quantity = floor(cash / ask_price / (len(selected_gapped_down_stocks) + len(selected_gapped_up_stocks)))
+        log.info(f"Submitting short order for {quantity} shares of: {selected_stock.symbol}")
+        try:
+            submit_order(
+                trading_client,
+                symbol=selected_stock.symbol,
+                quantity=quantity,
+                side=OrderSide.SELL,
+                order_type=OrderType.MARKET,
+                time_in_force=TimeInForce.DAY,
+            )
+            log.info(f"Submitted short order for {quantity} shares of: {selected_stock.symbol}")
         except Exception as e:
             log.error(f"Could not submit order. Error: {e}")
 
