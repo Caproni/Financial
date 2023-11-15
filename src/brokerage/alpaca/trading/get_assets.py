@@ -9,7 +9,7 @@ from alpaca.trading.requests import GetAssetsRequest
 from requests.exceptions import ConnectionError
 from alpaca.trading.models import Asset
 
-from src.utils.logger import logger as log
+from src.utils import log
 
 
 def get_assets(

@@ -7,7 +7,7 @@ Copyright 2023
 from alpaca.data.historical.stock import StockHistoricalDataClient
 from alpaca.data.requests import StockLatestQuoteRequest
 
-from src.utils.logger import logger as log
+from src.utils import log
 
 
 def get_latest_stock_data(

@@ -8,7 +8,7 @@ from alpaca.data.historical.stock import StockHistoricalDataClient
 from alpaca.data.requests import StockSnapshotRequest
 from alpaca.data.models import Snapshot
 
-from src.utils.logger import logger as log
+from src.utils import log
 
 
 def get_snapshots(

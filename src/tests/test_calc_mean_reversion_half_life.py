@@ -13,7 +13,7 @@ from src.univariate.analysis.calc_mean_reversion_half_life import (
 
 def test_calc_mean_reversion_half_life():
     np.random.seed(42)
-    t = np.linspace(0, 10*np.pi, 2000)
+    t = np.linspace(0, 10 * np.pi, 2000)
     data = list(np.sin(t) + np.random.normal(scale=0.05, size=len(t)))
     half_life = calc_mean_reversion_half_life(data)
     assert half_life > 0

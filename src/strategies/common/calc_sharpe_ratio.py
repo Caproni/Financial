@@ -4,7 +4,7 @@ Author: Edmund Bennett
 Copyright 2023
 """
 
-from src.utils.logger import logger as log
+from src.utils import log
 
 
 def calc_sharpe_ratio(

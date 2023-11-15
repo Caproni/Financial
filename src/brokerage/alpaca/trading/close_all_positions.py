@@ -7,7 +7,7 @@ Copyright 2023
 from alpaca.trading.client import TradingClient
 from requests.exceptions import ConnectionError
 
-from src.utils.logger import logger as log
+from src.utils import log
 
 
 def close_all_positions(

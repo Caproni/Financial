@@ -7,8 +7,11 @@ Copyright 2023
 from alpaca.data.timeframe import TimeFrame, TimeFrameUnit
 from datetime import datetime
 
-from ..brokerage.alpaca.client.create_market_data_client import create_historical_stock_data_client
+from ..brokerage.alpaca.client.create_market_data_client import (
+    create_historical_stock_data_client,
+)
 from ..brokerage.alpaca.data.get_stock_bars import get_stock_bars
+
 
 def test_get_stock_bars():
     client = create_historical_stock_data_client()

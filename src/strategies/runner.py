@@ -34,7 +34,7 @@ from src.strategies.intraday.common.close_positions_conditionally import (
 )
 from src.brokerage.alpaca.trading.close_position import close_position
 from src.strategies.common.calc_kelly_bet import calc_kelly_bet
-from src.utils.logger import logger as log
+from src.utils import log
 
 
 def runner(

@@ -12,7 +12,7 @@ from alpaca.data.models import BarSet
 from alpaca.common.exceptions import APIError
 from datetime import datetime
 
-from src.utils.logger import logger as log
+from src.utils import log
 
 
 def get_stock_bars(

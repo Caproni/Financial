@@ -8,7 +8,7 @@ from alpaca.broker.client import BrokerClient
 from dotenv import load_dotenv
 from os import getenv
 
-from src.utils.logger import logger as log
+from src.utils import log
 
 
 def create_broker_client(

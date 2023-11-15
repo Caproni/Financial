@@ -9,7 +9,7 @@ from os import getenv
 from alpaca.data.historical import StockHistoricalDataClient, CryptoHistoricalDataClient
 from alpaca.data.live import StockDataStream, CryptoDataStream
 
-from src.utils.logger import logger as log
+from src.utils import log
 
 
 def create_historical_stock_data_client() -> StockHistoricalDataClient:

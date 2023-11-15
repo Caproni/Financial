@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 from math import sqrt, floor
 
 from ..analysis.get_drawdowns import get_drawdowns
-from src.utils.logger import logger as log
+from src.utils import log
 
 
 def plot_drawdown_histogram(

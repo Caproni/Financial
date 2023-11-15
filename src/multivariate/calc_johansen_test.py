@@ -17,7 +17,7 @@ def calc_johansen_test(
     lag: int = 0,
 ):
     log.info("Calling calc_johansen_test")
-    
+
     df = pd.DataFrame(
         {
             "v1": v1,

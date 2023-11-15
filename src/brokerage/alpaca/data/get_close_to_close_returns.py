@@ -29,7 +29,7 @@ def get_close_to_close_returns(
         start=start,
         end=end,
     )
-    
+
     ctc_returns: dict[str, list[float]] = {}
     for symbol, bars in stock_bars.items():
         closes = [bar.close for bar in bars]
@@ -44,5 +44,5 @@ def get_close_to_close_returns(
                 symbol: ctc_diffs,
             }
         )
-            
-    return ctc_returns   
+
+    return ctc_returns

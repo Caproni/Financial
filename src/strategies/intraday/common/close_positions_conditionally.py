@@ -10,7 +10,7 @@ from alpaca.broker.client import BrokerClient
 
 from src.brokerage.alpaca.broker.get_clock import get_clock
 from src.brokerage.alpaca.trading.close_all_positions import close_all_positions
-from src.utils.logger import logger as log
+from src.utils import log
 
 
 def close_positions_conditionally(

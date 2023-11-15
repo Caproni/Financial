@@ -1,0 +1,270 @@
+{
+    "AAPL": [
+        {
+            "symbol": "AAPL",
+            "timestamp": "2023-10-18T04:00:00+00:00",
+            "open": 175.58,
+            "high": 177.575,
+            "low": 175.11,
+            "close": 175.84,
+            "volume": 54780899.0,
+            "trade_count": 540428.0,
+            "vwap": 176.349936
+        },
+        {
+            "symbol": "AAPL",
+            "timestamp": "2023-10-19T04:00:00+00:00",
+            "open": 176.04,
+            "high": 177.84,
+            "low": 175.19,
+            "close": 175.46,
+            "volume": 59312291.0,
+            "trade_count": 560468.0,
+            "vwap": 176.213972
+        },
+        {
+            "symbol": "AAPL",
+            "timestamp": "2023-10-20T04:00:00+00:00",
+            "open": 175.31,
+            "high": 175.42,
+            "low": 172.64,
+            "close": 172.88,
+            "volume": 64244029.0,
+            "trade_count": 600322.0,
+            "vwap": 173.745612
+        },
+        {
+            "symbol": "AAPL",
+            "timestamp": "2023-10-23T04:00:00+00:00",
+            "open": 170.91,
+            "high": 174.01,
+            "low": 169.93,
+            "close": 173.0,
+            "volume": 55986017.0,
+            "trade_count": 639779.0,
+            "vwap": 172.38296
+        },
+        {
+            "symbol": "AAPL",
+            "timestamp": "2023-10-24T04:00:00+00:00",
+            "open": 173.05,
+            "high": 173.67,
+            "low": 171.45,
+            "close": 173.44,
+            "volume": 43825971.0,
+            "trade_count": 530643.0,
+            "vwap": 172.733339
+        },
+        {
+            "symbol": "AAPL",
+            "timestamp": "2023-10-25T04:00:00+00:00",
+            "open": 171.88,
+            "high": 173.06,
+            "low": 170.65,
+            "close": 171.1,
+            "volume": 57219947.0,
+            "trade_count": 611287.0,
+            "vwap": 171.491193
+        },
+        {
+            "symbol": "AAPL",
+            "timestamp": "2023-10-26T04:00:00+00:00",
+            "open": 170.37,
+            "high": 171.3775,
+            "low": 165.67,
+            "close": 166.89,
+            "volume": 70660031.0,
+            "trade_count": 815731.0,
+            "vwap": 167.593955
+        },
+        {
+            "symbol": "AAPL",
+            "timestamp": "2023-10-27T04:00:00+00:00",
+            "open": 166.91,
+            "high": 168.96,
+            "low": 166.83,
+            "close": 168.22,
+            "volume": 58499131.0,
+            "trade_count": 609514.0,
+            "vwap": 167.907067
+        },
+        {
+            "symbol": "AAPL",
+            "timestamp": "2023-10-30T04:00:00+00:00",
+            "open": 169.02,
+            "high": 171.17,
+            "low": 168.87,
+            "close": 170.29,
+            "volume": 51135875.0,
+            "trade_count": 628371.0,
+            "vwap": 170.077414
+        },
+        {
+            "symbol": "AAPL",
+            "timestamp": "2023-10-31T04:00:00+00:00",
+            "open": 169.35,
+            "high": 170.9,
+            "low": 167.9,
+            "close": 170.77,
+            "volume": 44852482.0,
+            "trade_count": 510050.0,
+            "vwap": 169.925298
+        },
+        {
+            "symbol": "AAPL",
+            "timestamp": "2023-11-01T04:00:00+00:00",
+            "open": 171.0,
+            "high": 174.23,
+            "low": 170.12,
+            "close": 173.97,
+            "volume": 56951142.0,
+            "trade_count": 633750.0,
+            "vwap": 172.619294
+        },
+        {
+            "symbol": "AAPL",
+            "timestamp": "2023-11-02T04:00:00+00:00",
+            "open": 175.52,
+            "high": 177.78,
+            "low": 175.46,
+            "close": 177.57,
+            "volume": 77334754.0,
+            "trade_count": 805050.0,
+            "vwap": 176.67967
+        }
+    ],
+    "AMZN": [
+        {
+            "symbol": "AMZN",
+            "timestamp": "2023-10-18T04:00:00+00:00",
+            "open": 129.9,
+            "high": 130.6699,
+            "low": 127.51,
+            "close": 128.13,
+            "volume": 42708102.0,
+            "trade_count": 404798.0,
+            "vwap": 128.94397
+        },
+        {
+            "symbol": "AMZN",
+            "timestamp": "2023-10-19T04:00:00+00:00",
+            "open": 130.565,
+            "high": 132.24,
+            "low": 127.47,
+            "close": 128.4,
+            "volume": 60971602.0,
+            "trade_count": 538305.0,
+            "vwap": 129.837334
+        },
+        {
+            "symbol": "AMZN",
+            "timestamp": "2023-10-20T04:00:00+00:00",
+            "open": 128.05,
+            "high": 128.17,
+            "low": 124.97,
+            "close": 125.17,
+            "volume": 56406411.0,
+            "trade_count": 489135.0,
+            "vwap": 125.940235
+        },
+        {
+            "symbol": "AMZN",
+            "timestamp": "2023-10-23T04:00:00+00:00",
+            "open": 124.63,
+            "high": 127.88,
+            "low": 123.98,
+            "close": 126.56,
+            "volume": 48267151.0,
+            "trade_count": 423462.0,
+            "vwap": 126.303433
+        },
+        {
+            "symbol": "AMZN",
+            "timestamp": "2023-10-24T04:00:00+00:00",
+            "open": 127.74,
+            "high": 128.8,
+            "low": 126.34,
+            "close": 128.56,
+            "volume": 46667072.0,
+            "trade_count": 401610.0,
+            "vwap": 127.887875
+        },
+        {
+            "symbol": "AMZN",
+            "timestamp": "2023-10-25T04:00:00+00:00",
+            "open": 126.04,
+            "high": 126.34,
+            "low": 120.79,
+            "close": 121.39,
+            "volume": 74655802.0,
+            "trade_count": 739471.0,
+            "vwap": 122.73575
+        },
+        {
+            "symbol": "AMZN",
+            "timestamp": "2023-10-26T04:00:00+00:00",
+            "open": 120.63,
+            "high": 121.6393,
+            "low": 118.35,
+            "close": 119.57,
+            "volume": 101179331.0,
+            "trade_count": 871253.0,
+            "vwap": 120.611048
+        },
+        {
+            "symbol": "AMZN",
+            "timestamp": "2023-10-27T04:00:00+00:00",
+            "open": 126.2,
+            "high": 130.02,
+            "low": 125.52,
+            "close": 127.74,
+            "volume": 125309315.0,
+            "trade_count": 1056047.0,
+            "vwap": 128.128513
+        },
+        {
+            "symbol": "AMZN",
+            "timestamp": "2023-10-30T04:00:00+00:00",
+            "open": 129.72,
+            "high": 133.0,
+            "low": 128.56,
+            "close": 132.71,
+            "volume": 72500100.0,
+            "trade_count": 616435.0,
+            "vwap": 131.716351
+        },
+        {
+            "symbol": "AMZN",
+            "timestamp": "2023-10-31T04:00:00+00:00",
+            "open": 132.75,
+            "high": 133.57,
+            "low": 131.71,
+            "close": 133.09,
+            "volume": 51595256.0,
+            "trade_count": 433001.0,
+            "vwap": 132.760712
+        },
+        {
+            "symbol": "AMZN",
+            "timestamp": "2023-11-01T04:00:00+00:00",
+            "open": 133.96,
+            "high": 137.35,
+            "low": 133.71,
+            "close": 137.0,
+            "volume": 61541127.0,
+            "trade_count": 552833.0,
+            "vwap": 135.779147
+        },
+        {
+            "symbol": "AMZN",
+            "timestamp": "2023-11-02T04:00:00+00:00",
+            "open": 138.73,
+            "high": 138.81,
+            "low": 136.47,
+            "close": 138.07,
+            "volume": 52236695.0,
+            "trade_count": 464076.0,
+            "vwap": 137.699571
+        }
+    ]
+}

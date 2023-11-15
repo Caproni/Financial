@@ -16,7 +16,7 @@ from alpaca.trading.enums import OrderSide, TimeInForce, OrderType, OrderClass
 from alpaca.trading.models import Order
 from requests.exceptions import ConnectionError, RequestException
 
-from src.utils.logger import logger as log
+from src.utils import log
 
 
 def submit_order(

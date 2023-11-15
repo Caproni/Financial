@@ -5,13 +5,14 @@ Copyright 2023
 """
 
 from alpaca.broker.client import BrokerClient
+from alpaca.trading.models import Clock
 
-from src.utils.logger import logger as log
+from src.utils import log
 
 
 def get_clock(
     client: BrokerClient,
-):
+) -> Clock:
     log.info("Calling get_clock")
 
     return client.get_clock()

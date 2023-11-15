@@ -10,7 +10,7 @@ from alpaca.trading.enums import OrderSide, OrderSide, QueryOrderStatus
 from requests.exceptions import ConnectionError
 from datetime import datetime
 
-from src.utils.logger import logger as log
+from src.utils import log
 
 
 def get_orders(
