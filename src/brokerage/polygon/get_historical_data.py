@@ -16,6 +16,7 @@ def get_historical_data(
     from_date: str,
     to_date: str,
     timeframe: str,
+    multiplier: int = 1,
 ):
     log.info("Calling get_historical_data")
     
@@ -23,14 +24,14 @@ def get_historical_data(
     
     assert timeframe in {"day"}, "Selected timeframe is not supported."
 
-    with RESTClient(api_key=getenv("POLYGON_API_KEY")) as client:
-        response = client.stocks_equities_aggregates(
-            symbol,
-            1,
-            timeframe,
-            from_date,
-            to_date,
-            unadjusted=False,
-        )
-        return response.results
+    client = RESTClient(api_key=getenv("POLYGON_API_KEY"))
+    response = client.stocks_equities_aggregates(
+        symbol,
+        multiplier,
+        timeframe,
+        from_date,
+        to_date,
+        unadjusted=False,
+    )
+    return response.results
     
