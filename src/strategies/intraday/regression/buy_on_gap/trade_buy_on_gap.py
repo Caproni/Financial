@@ -21,7 +21,7 @@ def trade_buy_on_gap(
     backtest_mode: bool = True,
     trading_client: TradingClient | None = None,
 ) -> list[dict[str, Any]]:
-    """Trade the buy on gap strategy. This is an intra-day strategy which takes both long and short positions
+    """Trade the buy on gap strategy. This is an intra-day regression strategy which takes both long and short positions
     conditionally at the start of the trading day based on a gap approach.
     This function should be ran on/shortly after the start of the trading day.
 

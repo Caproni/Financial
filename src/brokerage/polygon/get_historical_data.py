@@ -24,8 +24,7 @@ def get_historical_data(
     
     assert timeframe in {"day"}, "Selected timeframe is not supported."
 
-    client = RESTClient(api_key=getenv("POLYGON_API_KEY"))
-    response = client.stocks_equities_aggregates(
+    response = RESTClient(api_key=getenv("POLYGON_API_KEY")).stocks_equities_aggregates(
         symbol,
         multiplier,
         timeframe,
