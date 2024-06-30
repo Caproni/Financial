@@ -63,7 +63,7 @@ def backtest_intraday_strategy(
         long_lookback_threshold = day - timedelta(days=long_lookback_days)
         strategy_data_payload: dict[str, float] = {}
         price_data_payload: dict[str, float] = {}
-        for s, symbol_data in data.items():  
+        for s, symbol_data in data.items():
             yesterday_data = []
             days_offset = 0
             while not yesterday_data and days_offset < long_lookback_days:
@@ -72,7 +72,8 @@ def backtest_intraday_strategy(
                     d
                     for d in symbol_data
                     if d["timestamp"].year == (day - timedelta(days=days_offset)).year
-                    and d["timestamp"].month == (day - timedelta(days=days_offset)).month
+                    and d["timestamp"].month
+                    == (day - timedelta(days=days_offset)).month
                     and d["timestamp"].day == (day - timedelta(days=days_offset)).day
                 ]
             today_data = [
@@ -98,7 +99,12 @@ def backtest_intraday_strategy(
                     last_close = long_lookback_closes[i - 1]
                     close_to_close = (this_close - last_close) / last_close
                     ctc_diffs.append(close_to_close)
-            if today_data and yesterday_data and short_lookback_closes and len(ctc_diffs) > 1:
+            if (
+                today_data
+                and yesterday_data
+                and short_lookback_closes
+                and len(ctc_diffs) > 1
+            ):
                 strategy_data_payload[s] = {
                     "long_sdt_devs": stdev(ctc_diffs),
                     "short_moving_averages": sum(short_lookback_closes)
@@ -125,18 +131,24 @@ def backtest_intraday_strategy(
             )
 
             # evaluate profit
-        
+
             profit = 0
             for trade in trades[day]:
-                today_close_prices = price_data_payload[trade["symbol"]]["today_close_prices"]
+                today_close_prices = price_data_payload[trade["symbol"]][
+                    "today_close_prices"
+                ]
                 multiplier = 1 if trade["side"] == OrderSide.BUY else -1
-                profit += trade["quantity"] * (today_close_prices - trade["price"]) * multiplier
+                profit += (
+                    trade["quantity"]
+                    * (today_close_prices - trade["price"])
+                    * multiplier
+                )
 
             cash += profit
             daily_cash.append(cash)
             daily_date.append(day)
-        
+
         day += timedelta(days=1)
-    
+
     plt.plot(daily_date, daily_cash)
     plt.show()

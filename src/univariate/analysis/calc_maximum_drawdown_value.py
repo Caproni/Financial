@@ -41,9 +41,9 @@ def calc_maximum_drawdown_value(
         "maximum_drawdown_max_index": maximum_drawdown_max_index,
         "maximum_drawdown_min_index": maximum_drawdown_min_index,
         "maximum_drawdown_value": maximum_drawdown_value,
-        "maximum_drawdown_value_percentage": maximum_drawdown_value
-        / data[maximum_drawdown_max_index]
-        * 100
-        if maximum_drawdown_value is not None
-        else None,
+        "maximum_drawdown_value_percentage": (
+            maximum_drawdown_value / data[maximum_drawdown_max_index] * 100
+            if maximum_drawdown_value is not None
+            else None
+        ),
     }

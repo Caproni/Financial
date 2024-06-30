@@ -54,14 +54,14 @@ def calc_maximum_drawdown_duration(
     return {
         "maximum_drawdown_duration_start_index": maximum_drawdown_duration_start_index,
         "maximum_drawdown_duration_end_index": maximum_drawdown_duration_end_index,
-        "maximum_drawdown_duration_start_timestamp": ts[
-            maximum_drawdown_duration_start_index
-        ]
-        if ts is not None and maximum_drawdown_duration_start_index is not None
-        else None,
-        "maximum_drawdown_duration_end_timestamp": ts[
-            maximum_drawdown_duration_end_index
-        ]
-        if ts is not None and maximum_drawdown_duration_end_index is not None
-        else None,
+        "maximum_drawdown_duration_start_timestamp": (
+            ts[maximum_drawdown_duration_start_index]
+            if ts is not None and maximum_drawdown_duration_start_index is not None
+            else None
+        ),
+        "maximum_drawdown_duration_end_timestamp": (
+            ts[maximum_drawdown_duration_end_index]
+            if ts is not None and maximum_drawdown_duration_end_index is not None
+            else None
+        ),
     }

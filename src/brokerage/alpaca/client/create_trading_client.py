@@ -18,8 +18,8 @@ def create_trading_client(
     load_dotenv()
     return TradingClient(
         api_key=getenv("ALPACA_PAPER_KEY") if paper else getenv("ALPACA_LIVE_KEY"),
-        secret_key=getenv("ALPACA_PAPER_SECRET")
-        if paper
-        else getenv("ALPACA_LIVE_SECRET"),
+        secret_key=(
+            getenv("ALPACA_PAPER_SECRET") if paper else getenv("ALPACA_LIVE_SECRET")
+        ),
         paper=paper,
     )
