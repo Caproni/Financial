@@ -24,7 +24,7 @@ def plot_history(
     stocks = get_data(
         mongo_client,
         database="financial",
-        collection="polygon_daily_historical_market_data",
+        collection="polygon_daily_market_data",
         pipeline=[{"$match": {"symbol": symbol}}],
     )
 

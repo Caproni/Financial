@@ -15,7 +15,10 @@ from src.mongo import insert_data, get_data, create_mongo_client
 from src.utils import log
 
 
-def populate_database_market_data() -> list[InsertManyResult]:
+def populate_database_market_data(
+    timespan: str,
+    collection: str,
+) -> list[InsertManyResult]:
     log.info("Calling populate_database_market_data")
 
     polygon_client = create_client()
@@ -34,14 +37,14 @@ def populate_database_market_data() -> list[InsertManyResult]:
         try:
             s = next(tickers)
         except StopIteration as e:
-            log.info("Reached end of generated tickers.")
+            log.info(f"Reached end of generated tickers: {e}")
             break
 
         log.info(f"Processing: {s.ticker}")
         historical_stock_bars = get_market_data(
             polygon_client,
             ticker=s.ticker,
-            timespan="day",
+            timespan=timespan,
             from_=now - timedelta(days=12 * 365),
             to=now - timedelta(days=1),
         )
@@ -53,7 +56,7 @@ def populate_database_market_data() -> list[InsertManyResult]:
             result = insert_data(
                 client=mongo_client,
                 database="financial",
-                collection="polygon_daily_historical_market_data",
+                collection=collection,
                 documents=historical_stock_bars,
             )
             results.append(result)
