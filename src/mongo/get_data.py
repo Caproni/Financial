@@ -1,7 +1,7 @@
 #!/usr/local/bin/python
 """
 Author: Edmund Bennett
-Copyright 2023
+Copyright 2024
 """
 
 from typing import Any

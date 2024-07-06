@@ -16,7 +16,7 @@ def insert_data(
     database: str,
     collection: str,
     documents: list[dict[str, Any]],
-) -> InsertManyResult:
+) -> InsertManyResult | None:
     """
     Insert data into Mongo database.
 
@@ -38,11 +38,15 @@ def insert_data(
             "vwap": 22.38822
         }
     Returns:
-        InsertManyResult
+        InsertManyResult | None
     """
     log.info("Calling insert_data")
     db = client[database]
     collection = db[collection]
+
+    if not documents:
+        log.info("No documents to insert.")
+        return None
 
     result = collection.insert_many(documents)
     log.info(f"Inserted {len(result.inserted_ids)} documents into the collection.")
