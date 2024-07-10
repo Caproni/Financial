@@ -18,7 +18,7 @@ def list_ticker_news(
     published_utc_gte: datetime | None = None,
 ) -> list[dict[str, Any]]:
     log.info("Calling get_ticker_news")
-    
+
     raw = True
 
     try:
@@ -27,11 +27,12 @@ def list_ticker_news(
             published_utc_lte=published_utc_lte,
             published_utc_gte=published_utc_gte,
             raw=raw,
+            limit=1_000,
         )
     except Exception as e:
         log.error(f"Error: {e}")
         return []
-    
+
     if raw:
         results = response.json()["results"]
         return [
@@ -43,16 +44,30 @@ def list_ticker_news(
                 "polygon_id": e["id"] if "id" in e.keys() else None,
                 "image_url": e["image_url"] if "image_url" in e.keys() else None,
                 "keywords": e["keywords"] if "keywords" in e.keys() else None,
-                "published_utc": datetime.fromisoformat(e["published_utc"]) if "published_utc" in e.keys() else None,
+                "published_utc": (
+                    datetime.fromisoformat(e["published_utc"])
+                    if "published_utc" in e.keys()
+                    else None
+                ),
                 "publisher": {
-                    "favicon_url": e["publisher"]["favicon_url"] if "publisher" in e.keys() else None,
-                    "homepage_url": e["publisher"]["homepage_url"] if "publisher" in e.keys() else None,
-                    "logo_url": e["publisher"]["logo_url"] if "publisher" in e.keys() else None,
+                    "favicon_url": (
+                        e["publisher"]["favicon_url"]
+                        if "publisher" in e.keys()
+                        else None
+                    ),
+                    "homepage_url": (
+                        e["publisher"]["homepage_url"]
+                        if "publisher" in e.keys()
+                        else None
+                    ),
+                    "logo_url": (
+                        e["publisher"]["logo_url"] if "publisher" in e.keys() else None
+                    ),
                     "name": e["publisher"]["name"] if "publisher" in e.keys() else None,
                 },
                 "tickers": e["tickers"] if "tickers" in e.keys() else None,
                 "title": e["title"] if "title" in e.keys() else None,
-                "insights": e["insights"] if "insights" in e.keys() else None
+                "insights": e["insights"] if "insights" in e.keys() else None,
             }
             for e in results
         ]

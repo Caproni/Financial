@@ -5,8 +5,7 @@ Copyright 2024
 """
 
 from typing import Any
-from pymongo import MongoClient
-from pymongo.results import InsertManyResult
+from pymongo import MongoClient, InsertOne, errors
 
 from src.utils import log
 
@@ -16,7 +15,8 @@ def insert_data(
     database: str,
     collection: str,
     documents: list[dict[str, Any]],
-) -> InsertManyResult | None:
+    stop_on_key_violation: bool = True,
+) -> int | None:
     """
     Insert data into Mongo database.
 
@@ -37,6 +37,7 @@ def insert_data(
             "trade_count": 19
             "vwap": 22.38822
         }
+    stop_on_key_violation (bool): Sets the "ordered" parameter which defines whether a process should stop when a key violation occurs. Defaults to True in which case the process will raise an error on key violations.
     Returns:
         InsertManyResult | None
     """
@@ -48,6 +49,17 @@ def insert_data(
         log.info("No documents to insert.")
         return None
 
-    result = collection.insert_many(documents)
-    log.info(f"Inserted {len(result.inserted_ids)} documents into the collection.")
-    return result
+    payload: list[InsertOne] = [InsertOne(doc) for doc in documents]
+    
+    try:
+        result = collection.bulk_write(
+            payload,
+            ordered=stop_on_key_violation,
+        )
+        insertions = result.inserted_count
+        log.info(f"Inserted: {insertions} documents into the collection.")
+    except errors.BulkWriteError as bwe:
+        insertions = bwe.details['nInserted']
+        log.info(f"Inserted: {insertions} documents into the collection.")
+
+    return insertions

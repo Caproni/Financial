@@ -17,16 +17,46 @@ from src.utils import log
 def plot_history(
     mongo_client: MongoClient,
     symbol: str,
+    collection: str,
     news_flag: bool = False,
+    news_item_alignment: str | None = None,
 ):
+    """
+    Plots historical stock data with optional news annotations.
+
+    Args:
+        mongo_client: MongoClient instance for database connection.
+        symbol: Stock symbol for which data is plotted.
+        collection: Name of the collection in the database.
+        news_flag: Flag to include news annotations (default is False).
+        news_item_alignment: Alignment for news items, either 'D' (day) or 'H' (hour).
+
+    Returns:
+        None
+
+    Raises:
+        AssertionError: If news_item_alignment is not 'D' or 'H'.
+    """
     log.info("Calling plot_history")
+
+    if news_item_alignment is None:
+        news_item_alignment = "D"
+
+    assert news_item_alignment in {
+        "D",
+        "H",
+    }, "News item alignment should be one of D (day), H (hour)."
 
     stocks = get_data(
         mongo_client,
         database="financial",
-        collection="polygon_daily_market_data",
+        collection=collection,
         pipeline=[{"$match": {"symbol": symbol}}],
     )
+
+    if not stocks:
+        log.warning(f"No stock data available for selected symbol: {symbol}")
+        return None
 
     stocks_df = pd.DataFrame(stocks)
 
@@ -43,6 +73,8 @@ def plot_history(
         )
 
     news_df = pd.DataFrame(news)
+
+    log.info("Constructing plot.")
 
     fig = go.Figure(
         data=[
@@ -66,32 +98,45 @@ def plot_history(
     sentiment_colors = {
         "positive": "green",
         "negative": "red",
+        "bearish": "red",
         "neutral": "gray",
     }
 
     # Add annotations for news events
     for _, row in news_df.iterrows():
+        log.info(f"Processing news article: {row['title']}")
         if row["insights"]:
+            log.info("Insights found.")
             for insight in row["insights"]:
                 if insight["ticker"] == symbol:
+                    log.info("Matched symbol.")
+
+                    rounded_timestamp = row["published_utc"].round(news_item_alignment)
+                    stocks_df["time_diff"] = (
+                        stocks_df["timestamp"] - row["published_utc"]
+                    ).abs()
+                    nearest_row = stocks_df.loc[stocks_df["time_diff"].idxmin()]
+                    stocks_df.drop(columns=["time_diff"], inplace=True)
+                    linked_stocks_df = nearest_row.to_frame().T
+
                     fig.add_trace(
                         go.Scatter(
-                            x=[row["published_utc"]],
+                            x=[rounded_timestamp],
                             y=[
                                 (
-                                    stock_df[stock_df["timestamp"] == row["published_utc"]][
-                                        "close"
-                                    ].values[0]
-                                    if not stock_df[stock_df["timestamp"] == row["published_utc"]].empty
-                                    else None
+                                    None
+                                    if linked_stocks_df.empty
+                                    else linked_stocks_df["close"].values[0]
                                 )
                             ],
                             mode="markers+text",
-                            marker=dict(color=sentiment_colors[row["sentiment"]], size=10),
-                            text=insight["sentiment_reasoning"],
+                            marker=dict(
+                                color=sentiment_colors[insight["sentiment"]], size=10
+                            ),
                             textposition="top center",
-                            name=row["title"],
+                            name=row["title"] + f" ({row['published_utc']})",
                         )
                     )
+                    break
 
     fig.show()

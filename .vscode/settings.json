@@ -7,6 +7,9 @@
     "cSpell.words": [
         "dotenv",
         "iterrows",
-        "pymongo"
+        "pymongo",
+        "timespan",
+        "timespans",
+        "vwap"
     ]
 }

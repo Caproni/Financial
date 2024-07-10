@@ -31,28 +31,27 @@ def populate_database_market_data(
         pipeline=None,
     )
 
+    N = len(tickers)
+
     now = datetime.now()
     results: list[InsertManyResult] = []
-    while True:
-        try:
-            s = next(tickers)
-        except StopIteration as e:
-            log.info(f"Reached end of generated tickers: {e}")
-            break
-
-        log.info(f"Processing: {s.ticker}")
+    for i, s in enumerate(tickers):
+        if i < 4065 or "C:" in s["ticker"]:
+            continue
+        log.info(f"Processing ticker {i + 1} of {N}")
+        log.info(f"Processing: {s['ticker']}")
         historical_stock_bars = get_market_data(
             polygon_client,
-            ticker=s.ticker,
+            ticker=s["ticker"],
             timespan=timespan,
-            from_=now - timedelta(days=12 * 365),
+            from_=now - timedelta(days=365 * 5 + 1),
             to=now - timedelta(days=1),
         )
 
-        N = len(historical_stock_bars)
-        if N:
-            log.info(f"Data obtained for symbol: {s.ticker}")
-            log.info(f"Number of documents obtained: {N}")
+        number_of_bars = len(historical_stock_bars)
+        if number_of_bars:
+            log.info(f"Data obtained for symbol: {s['ticker']}")
+            log.info(f"Number of documents obtained: {number_of_bars}")
             result = insert_data(
                 client=mongo_client,
                 database="financial",

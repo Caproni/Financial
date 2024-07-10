@@ -6,8 +6,9 @@ Copyright 2024
 
 from typing import Any
 from polygon import RESTClient
-from datetime import datetime
+from datetime import datetime, timedelta
 
+from src.brokerage.polygon.utils import get_delta
 from src.utils import log
 
 
@@ -44,20 +45,28 @@ def get_market_data(
         "quarter",
         "year",
     }, "Selected timespan is not supported."
+    
+    delta = get_delta(timespan)
 
-    try:
-        response = client.get_aggs(
-            ticker=ticker,
-            multiplier=multiplier,
-            timespan=timespan,
-            from_=from_,
-            to=to,
-            adjusted=True,
-            raw=False,
-        )
-    except Exception as e:
-        log.error(f"Error: {e}")
-        return []
+    responses = []
+    start_datetime = from_
+    while start_datetime <= to:
+        try:
+            response = client.get_aggs(
+                ticker=ticker,
+                multiplier=multiplier,
+                timespan=timespan,
+                from_=start_datetime,
+                to=min(start_datetime + delta - timedelta(seconds=1), to),  # subtract a second to prevent double-counting,
+                adjusted=True,
+                raw=False,
+                limit=50_000,
+            )
+            responses += response
+            start_datetime += delta
+        except Exception as e:
+            log.error(f"Error: {e}")
+            raise e
     return [
         {
             "symbol": ticker,
@@ -71,5 +80,5 @@ def get_market_data(
             "volume": e.volume,
             "vwap": e.vwap,
         }
-        for e in response
+        for e in responses
     ]

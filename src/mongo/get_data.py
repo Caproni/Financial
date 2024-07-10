@@ -39,4 +39,9 @@ def get_data(
     if pipeline is None:
         pipeline = []
 
-    return list(collection.aggregate(pipeline))
+    return list(
+        collection.aggregate(
+            pipeline,
+            allowDiskUse=True,
+        )
+    )
