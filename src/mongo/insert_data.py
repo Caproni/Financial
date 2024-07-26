@@ -61,5 +61,8 @@ def insert_data(
     except errors.BulkWriteError as bwe:
         insertions = bwe.details['nInserted']
         log.info(f"Inserted: {insertions} documents into the collection.")
+    except errors.ServerSelectionTimeoutError as sst:
+        log.error(f"Error: {sst}")
+        raise sst
 
     return insertions

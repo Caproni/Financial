@@ -34,4 +34,9 @@ def create_mongo_client(
     if not mongo_uri:
         raise ValueError("MONGO_URI must be set in the environment variables")
 
-    return MongoClient(mongo_uri)
+    return MongoClient(
+        mongo_uri,
+        maxPoolSize=50,
+        minPoolSize=10,
+        waitQueueTimeoutMS=10000,
+    )
