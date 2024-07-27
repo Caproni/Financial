@@ -47,7 +47,7 @@ async def process_ticker(
             mongo_client,
             "financial",
             collection,
-            historical_bars
+            historical_bars,
         )
         log.info(f"Data inserted for symbol: {ticker}")
         return result
@@ -77,8 +77,8 @@ async def populate_database_market_data(
     results: list[InsertManyResult] = []
     tasks: list[asyncio.Task] = []
     for i, s in enumerate(tickers):
-        if "C:" in s["ticker"] or "I:" in s["ticker"]:
-            log.info("Ticker is a currency conversion (C:) or index (I:)")
+        if "C:" in s["ticker"] or "I:" in s["ticker"] or "X:" in s["ticker"]:
+            log.info("Ticker is a currency conversion (C:) or index (I:) or mutual (X:)")
             continue
         log.info(f"Processing ticker {i + 1} of {N}")
         log.info(f"Processing: {s['ticker']}")

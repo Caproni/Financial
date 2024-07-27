@@ -5,6 +5,7 @@ Copyright 2024
 """
 
 from typing import Any
+from time import sleep
 from pymongo import MongoClient, InsertOne, errors
 
 from src.utils import log
@@ -16,6 +17,7 @@ def insert_data(
     collection: str,
     documents: list[dict[str, Any]],
     stop_on_key_violation: bool = True,
+    max_retries: int = 5,
 ) -> int | None:
     """
     Insert data into Mongo database.
@@ -38,6 +40,8 @@ def insert_data(
             "vwap": 22.38822
         }
     stop_on_key_violation (bool): Sets the "ordered" parameter which defines whether a process should stop when a key violation occurs. Defaults to True in which case the process will raise an error on key violations.
+    max_retries (int): The maximum number of attempts to make at inserting the data. Defaults to 5.
+    
     Returns:
         InsertManyResult | None
     """
@@ -51,18 +55,32 @@ def insert_data(
 
     payload: list[InsertOne] = [InsertOne(doc) for doc in documents]
     
-    try:
-        result = collection.bulk_write(
-            payload,
-            ordered=stop_on_key_violation,
-        )
-        insertions = result.inserted_count
-        log.info(f"Inserted: {insertions} documents into the collection.")
-    except errors.BulkWriteError as bwe:
-        insertions = bwe.details['nInserted']
-        log.info(f"Inserted: {insertions} documents into the collection.")
-    except errors.ServerSelectionTimeoutError as sst:
-        log.error(f"Error: {sst}")
-        raise sst
+    insertions = None
+    attempt = 1
+    while attempt <= max_retries:
+        try:
+            result = collection.bulk_write(
+                payload,
+                ordered=stop_on_key_violation,
+            )
+            insertions = result.inserted_count
+            log.info(f"Inserted: {insertions} documents into the collection.")
+            break
+        except errors.BulkWriteError as bwe:
+            insertions = bwe.details["nInserted"]
+            log.info(f"Inserted: {insertions} documents into the collection.")
+            break
+        except errors.NotPrimaryError as npe:
+            log.error(f"Error: {npe}")
+            sleep(1)
+            if attempt >= max_retries:
+                raise npe
+            attempt += 1
+        except errors.ServerSelectionTimeoutError as sst:
+            log.error(f"Error: {sst}")
+            sleep(1)
+            if attempt >= max_retries:
+                raise sst
+            attempt += 1
 
     return insertions
