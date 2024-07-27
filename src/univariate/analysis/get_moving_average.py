@@ -14,7 +14,7 @@ def get_moving_average(
     data: list[float | int],
     weighting: str,
     steps: int = None,
-) -> (list[float | int], list[float | int]):
+) -> tuple[list[float | int], list[float | int]]:
     log.info("Calling get_moving_average")
 
     if not data:

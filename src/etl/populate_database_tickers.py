@@ -10,7 +10,7 @@ from src.brokerage.polygon import (
     list_tickers,
     create_client,
 )
-from src.mongo import insert_data, delete_data, create_mongo_client
+from src.mongo import insert_data, create_mongo_client
 from src.utils import log
 
 
@@ -25,13 +25,8 @@ def populate_database_tickers() -> InsertManyResult:
         market=None,
         active=None,
     )
-
-    delete_data(
-        mongo_client,
-        database="financial",
-        collection="tickers",
-        document_filter=None,
-    )
+    
+    log.info(f"Obtained: {len(tickers)} tickers.")
 
     return insert_data(
         mongo_client,

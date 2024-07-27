@@ -14,18 +14,29 @@ from src.utils import log
 def list_ticker_news(
     client: RESTClient,
     ticker: str | None = None,
-    published_utc_lte: datetime | None = None,
+    published_utc_lt: datetime | None = None,
     published_utc_gte: datetime | None = None,
+    raw: bool = True,
 ) -> list[dict[str, Any]]:
-    log.info("Calling get_ticker_news")
+    """Obtains news articles within a time range and optionally for a specific ticker.
 
-    raw = True
+    Args:
+        client (RESTClient): A Polygon client.
+        ticker (str | None, optional): Optionally, a ticker for which to obtain news. Defaults to None.
+        published_utc_lt (datetime | None, optional): Upper time bound for news articles. Defaults to None.
+        published_utc_gte (datetime | None, optional): Lower time bound for news articles. Defaults to None.
+        raw (bool, optional): Whether to return a raw data payload. Defaults to True.
+
+    Returns:
+        list[dict[str, Any]]: A list of obtained news articles.
+    """
+    log.info("Calling get_ticker_news")
 
     try:
         response = client.list_ticker_news(
             ticker=ticker,
-            published_utc_lte=published_utc_lte,
-            published_utc_gte=published_utc_gte,
+            published_utc_lt=published_utc_lt.isoformat(),
+            published_utc_gte=published_utc_gte.isoformat(),
             raw=raw,
             limit=1_000,
         )

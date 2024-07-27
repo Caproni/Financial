@@ -69,7 +69,7 @@ def runner(
     drawdown_threshold_percentage = 1
     hurst_threshold = 0.6
 
-    log.info(f"Entering trading loop.")
+    log.info("Entering trading loop.")
 
     first_run = True
 

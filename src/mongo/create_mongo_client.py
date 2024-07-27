@@ -20,7 +20,7 @@ def create_mongo_client(
         mongo_uri (str | None, optional): A MongoDb URI. Must contain username and password where required to connect. Defaults to None.
 
     Raises:
-        ValueError: _description_
+        ValueError: Missing environment variables
 
     Returns:
         MongoClient: A Mongo client ready to use.

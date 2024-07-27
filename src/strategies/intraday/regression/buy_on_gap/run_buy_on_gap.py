@@ -53,7 +53,7 @@ def run_buy_on_gap(
 
     log.info(f"Current market time: {clock.timestamp}")
 
-    log.info(f"Sleeping until market close...")
+    log.info("Sleeping until market close...")
 
     minutes_until_next_period = (rest_period.seconds // 60) - clock.timestamp.minute % (
         rest_period.seconds // 60
