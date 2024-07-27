@@ -14,8 +14,8 @@ from src.utils import log
 def list_ticker_news(
     client: RESTClient,
     ticker: str | None = None,
-    published_utc_lt: datetime | None = None,
     published_utc_gte: datetime | None = None,
+    published_utc_lt: datetime | None = None,
     raw: bool = True,
 ) -> list[dict[str, Any]]:
     """Obtains news articles within a time range and optionally for a specific ticker.
@@ -23,8 +23,8 @@ def list_ticker_news(
     Args:
         client (RESTClient): A Polygon client.
         ticker (str | None, optional): Optionally, a ticker for which to obtain news. Defaults to None.
-        published_utc_lt (datetime | None, optional): Upper time bound for news articles. Defaults to None.
         published_utc_gte (datetime | None, optional): Lower time bound for news articles. Defaults to None.
+        published_utc_lt (datetime | None, optional): Upper time bound for news articles. Defaults to None.
         raw (bool, optional): Whether to return a raw data payload. Defaults to True.
 
     Returns:

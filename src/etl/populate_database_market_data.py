@@ -4,7 +4,7 @@ Author: Edmund Bennett
 Copyright 2024
 """
 
-import asyncio
+from asyncio import Semaphore, Task, to_thread, gather
 from polygon import RESTClient
 from pymongo import MongoClient
 from pymongo.results import InsertManyResult
@@ -26,11 +26,11 @@ async def process_ticker(
     from_: datetime, 
     to: datetime, 
     collection: str,
-    semaphore: asyncio.Semaphore,
+    semaphore: Semaphore,
 ) -> InsertManyResult | None:
     log.info("Calling process_ticker")
     async with semaphore:
-        historical_bars = await asyncio.to_thread(
+        historical_bars = await to_thread(
             get_market_data,
             polygon_client,
             ticker,
@@ -42,7 +42,7 @@ async def process_ticker(
     if historical_bars:
         log.info(f"Data obtained for symbol: {ticker}")
         log.info(f"Number of documents obtained: {len(historical_bars)}")
-        result = await asyncio.to_thread(
+        result = await to_thread(
             insert_data,
             mongo_client,
             "financial",
@@ -75,7 +75,7 @@ async def populate_database_market_data(
 
     now = datetime.now()
     results: list[InsertManyResult] = []
-    tasks: list[asyncio.Task] = []
+    tasks: list[Task] = []
     for i, s in enumerate(tickers):
         if "C:" in s["ticker"] or "I:" in s["ticker"] or "X:" in s["ticker"]:
             log.info("Ticker is a currency conversion (C:) or index (I:) or mutual (X:)")
@@ -91,17 +91,17 @@ async def populate_database_market_data(
                 now - timedelta(days=365 * 5 + 1),
                 now - timedelta(days=1),
                 collection=collection,
-                semaphore=asyncio.Semaphore(batch_size),
+                semaphore=Semaphore(batch_size),
             )
         )
         
         if len(tasks) >= batch_size:
-            batch_results = await asyncio.gather(*tasks)
+            batch_results = await gather(*tasks)
             results.extend([result for result in batch_results if result])
             tasks = []
 
     if tasks:  # final set of results
-        batch_results = await asyncio.gather(*tasks)
+        batch_results = await gather(*tasks)
         results.extend([result for result in batch_results if result])
 
     return results

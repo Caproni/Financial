@@ -93,6 +93,42 @@ def plot_history(
         xaxis_title="Timestamp",
         yaxis_title="Stock Price",
         xaxis_rangeslider_visible=True,
+        legend={
+            "yanchor": "top",
+            "y": 1,
+            "xanchor": "left",
+            "x": 1,
+            "font": {"size": 12},
+            "title": "Publications",
+            "traceorder": "normal",
+            "itemwidth": 30,  # This controls the width of each legend item
+            "itemsizing": "constant",  # Ensures items have the same width
+        },
+        updatemenus=[
+            {
+                "type": "buttons",
+                "direction": "left",
+                "buttons": [
+                    dict(
+                        args=["showlegend", False],
+                        label="Hide Legend",
+                        method="relayout"
+                    ),
+                    dict(
+                        args=["showlegend", True],
+                        label="Show Legend",
+                        method="relayout"
+                    )
+                ],
+                "pad": {"r": 10, "t": 10},
+                "showactive": True,
+                "x": 1.0,
+                "xanchor": "left",
+                "y": 0.15,
+                "yanchor": "top",
+            },
+        ],
+        margin={"t": 50},
     )
 
     sentiment_colors = {
@@ -105,19 +141,18 @@ def plot_history(
     # Add annotations for news events
     for _, row in news_df.iterrows():
         log.info(f"Processing news article: {row['title']}")
+        rounded_timestamp = row["published_utc"].round(news_item_alignment)
+        stocks_df["time_diff"] = (
+            stocks_df["timestamp"] - row["published_utc"]
+        ).abs()
+        nearest_row = stocks_df.loc[stocks_df["time_diff"].idxmin()]
+        stocks_df.drop(columns=["time_diff"], inplace=True)
+        linked_stocks_df = nearest_row.to_frame().T
         if row["insights"]:
             log.info("Insights found.")
             for insight in row["insights"]:
                 if insight["ticker"] == symbol:
                     log.info("Matched symbol.")
-
-                    rounded_timestamp = row["published_utc"].round(news_item_alignment)
-                    stocks_df["time_diff"] = (
-                        stocks_df["timestamp"] - row["published_utc"]
-                    ).abs()
-                    nearest_row = stocks_df.loc[stocks_df["time_diff"].idxmin()]
-                    stocks_df.drop(columns=["time_diff"], inplace=True)
-                    linked_stocks_df = nearest_row.to_frame().T
 
                     fig.add_trace(
                         go.Scatter(
@@ -138,5 +173,25 @@ def plot_history(
                         )
                     )
                     break
+        else:
+            log.info("No insights found.")
+            fig.add_trace(
+                go.Scatter(
+                    x=[rounded_timestamp],
+                    y=[
+                        (
+                            None
+                            if linked_stocks_df.empty
+                            else linked_stocks_df["close"].values[0]
+                        )
+                    ],
+                    mode="markers+text",
+                    marker=dict(
+                        color=sentiment_colors["neutral"], size=10
+                    ),
+                    textposition="top center",
+                    name=row["title"] + f" ({row['published_utc']})",
+                )
+            )
 
     fig.show()
