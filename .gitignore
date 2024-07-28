@@ -1,9 +1,5 @@
 staging/
 
-# Python
-analyse.py
-diagnostics.py
-
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
