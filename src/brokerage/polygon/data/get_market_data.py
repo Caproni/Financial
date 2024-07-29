@@ -4,6 +4,8 @@ Author: Edmund Bennett
 Copyright 2024
 """
 
+from asyncio import run
+from asyncio import to_thread, Task, gather
 from typing import Any
 from polygon import RESTClient
 from datetime import datetime, timedelta
@@ -12,7 +14,31 @@ from src.brokerage.polygon.utils import get_delta
 from src.utils import log
 
 
-def get_market_data(
+async def get_market_data_async(
+    polygon_client: RESTClient,
+    ticker: str,
+    timespan: str,
+    delta: timedelta,
+    multiplier: int,
+    start_datetime: datetime,
+    to: datetime,
+):
+    return await to_thread(
+        polygon_client.get_aggs,
+        ticker=ticker,
+        multiplier=multiplier,
+        timespan=timespan,
+        from_=start_datetime,
+        to=min(
+            start_datetime + delta - timedelta(seconds=1), to
+        ),  # subtract a second to prevent double-counting,
+        adjusted=True,
+        raw=False,
+        limit=50_000,
+    )
+
+
+async def get_market_data(
     client: RESTClient,
     ticker: str,
     from_: datetime,
@@ -48,27 +74,33 @@ def get_market_data(
 
     delta = get_delta(timespan)
 
-    responses = []
+    tasks: list[Task] = []
     start_datetime = from_
     while start_datetime <= to:
         try:
-            response = client.get_aggs(
-                ticker=ticker,
-                multiplier=multiplier,
-                timespan=timespan,
-                from_=start_datetime,
-                to=min(
-                    start_datetime + delta - timedelta(seconds=1), to
-                ),  # subtract a second to prevent double-counting,
-                adjusted=True,
-                raw=False,
-                limit=50_000,
+            tasks.append(
+                get_market_data_async(
+                    polygon_client=client,
+                    ticker=ticker,
+                    timespan=timespan,
+                    delta=delta,
+                    multiplier=multiplier,
+                    start_datetime=from_,
+                    to=to,
+                )
             )
-            responses += response
+        
             start_datetime += delta
+
         except Exception as e:
             log.error(f"Error: {e}")
             raise e
+    
+    responses: list[dict[str, Any]] = []
+    if tasks:
+        batch_results = await gather(*tasks)
+        responses = [r for result in batch_results for r in result if result]
+    
     return [
         {
             "symbol": ticker,

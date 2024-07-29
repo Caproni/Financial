@@ -4,8 +4,6 @@ Author: Edmund Bennett
 Copyright 2024
 """
 
-from asyncio import run
-
 from src.etl import populate_database_market_data
 from src.mongo import create_mongo_client
 from src.utils import log
@@ -21,11 +19,9 @@ if __name__ == "__main__":
 
     timespan = "hour"
 
-    run(
-        populate_database_market_data(
-            timespan=timespan,
-            collection=f"polygon_market_data_{timespan}",
-        )
+    populate_database_market_data(
+        timespan=timespan,
+        collection=f"polygon_market_data_{timespan}",
     )
 
     log.info("Completed database population.")

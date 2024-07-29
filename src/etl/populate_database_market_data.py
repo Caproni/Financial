@@ -4,9 +4,7 @@ Author: Edmund Bennett
 Copyright 2024
 """
 
-from asyncio import Semaphore, Task, to_thread, gather
-from polygon import RESTClient
-from pymongo import MongoClient
+from asyncio import run
 from pymongo.results import InsertManyResult
 from datetime import datetime, timedelta
 
@@ -18,46 +16,9 @@ from src.mongo import insert_data, get_data, create_mongo_client
 from src.utils import log
 
 
-async def process_ticker(
-    mongo_client: MongoClient,
-    polygon_client: RESTClient,
-    ticker: str,
-    timespan: str,
-    from_: datetime,
-    to: datetime,
-    collection: str,
-    semaphore: Semaphore,
-) -> InsertManyResult | None:
-    log.info("Calling process_ticker")
-    async with semaphore:
-        historical_bars = await to_thread(
-            get_market_data,
-            polygon_client,
-            ticker,
-            from_,
-            to,
-            timespan,
-        )
-
-    if historical_bars:
-        log.info(f"Data obtained for symbol: {ticker}")
-        log.info(f"Number of documents obtained: {len(historical_bars)}")
-        result = await to_thread(
-            insert_data,
-            mongo_client,
-            "financial",
-            collection,
-            historical_bars,
-        )
-        log.info(f"Data inserted for symbol: {ticker}")
-        return result
-    return None
-
-
-async def populate_database_market_data(
+def populate_database_market_data(
     timespan: str,
     collection: str,
-    batch_size: int = 10,
 ) -> list[InsertManyResult]:
     log.info("Calling populate_database_market_data")
 
@@ -75,7 +36,6 @@ async def populate_database_market_data(
 
     now = datetime.now()
     results: list[InsertManyResult] = []
-    tasks: list[Task] = []
     for i, s in enumerate(tickers):
         if "C:" in s["ticker"] or "I:" in s["ticker"] or "X:" in s["ticker"]:
             log.info(
@@ -84,26 +44,26 @@ async def populate_database_market_data(
             continue
         log.info(f"Processing ticker {i + 1} of {N}")
         log.info(f"Processing: {s['ticker']}")
-        tasks.append(
-            process_ticker(
-                mongo_client,
+                
+        if historical_bars := run(
+            get_market_data(
                 polygon_client,
                 s["ticker"],
-                timespan,
                 now - timedelta(days=365 * 5 + 1),
                 now - timedelta(days=1),
-                collection=collection,
-                semaphore=Semaphore(batch_size),
+                timespan,
             )
-        )
-
-        if len(tasks) >= batch_size:
-            batch_results = await gather(*tasks)
-            results.extend([result for result in batch_results if result])
-            tasks = []
-
-    if tasks:  # final set of results
-        batch_results = await gather(*tasks)
-        results.extend([result for result in batch_results if result])
+        ):
+            log.info(f"Data obtained for symbol: {s['ticker']}")
+            log.info(f"Number of documents obtained: {len(historical_bars)}")
+            result = insert_data(
+                mongo_client,
+                "financial",
+                collection,
+                historical_bars,
+            )
+            log.info(f"Data inserted for symbol: {s['ticker']}")
+        
+        results.append(result)
 
     return results
