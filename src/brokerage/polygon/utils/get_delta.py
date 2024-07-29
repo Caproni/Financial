@@ -19,7 +19,7 @@ def get_delta(timespan: str) -> timedelta:
         timedelta: A timedelta to use when querying data. i.e. from_=start_datetime, to=start_datetime + delta
     """
     log.info("Calling get_delta")
-    
+
     assert timespan in {
         "second",
         "minute",
@@ -30,7 +30,7 @@ def get_delta(timespan: str) -> timedelta:
         "quarter",
         "year",
     }, "Selected timespan is not supported."
-    
+
     match timespan:
         case "second":  # 12-hour windows (base aggregation type is assumed second)
             delta = timedelta(seconds=60 * 60 * 12)
@@ -38,7 +38,9 @@ def get_delta(timespan: str) -> timedelta:
             delta = timedelta(days=30)
         case "hour":  # one-month windows (base aggregation type is minute)
             delta = timedelta(days=30)
-        case "day" | "week" | "month" | "quarter" | "year":  # five-year windows (base aggregation type is day)
+        case (
+            "day" | "week" | "month" | "quarter" | "year"
+        ):  # five-year windows (base aggregation type is day)
             delta = timedelta(days=365 * 5)
-    
+
     return delta

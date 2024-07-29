@@ -41,7 +41,7 @@ def populate_database_statistical_data(
             client=client,
             database=database,
             collection=input_collection_name,
-            pipeline= [
+            pipeline=[
                 {
                     "$match": {
                         "symbol": ticker["ticker"],

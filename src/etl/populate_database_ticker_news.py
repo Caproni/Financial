@@ -19,8 +19,8 @@ from src.utils import log
 
 
 async def process_ticker(
-    polygon_client: RESTClient, 
-    ticker: str, 
+    polygon_client: RESTClient,
+    ticker: str,
     published_utc_gte: datetime,
     published_utc_lt: datetime,
 ) -> list[dict[str, Any]]:

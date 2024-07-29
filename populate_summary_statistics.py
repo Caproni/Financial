@@ -11,9 +11,9 @@ from src.utils import log
 
 
 if __name__ == "__main__":
-    
+
     log.info("Starting summary calculations.")
-    
+
     mongo_client = create_mongo_client()
 
     plot_history(
@@ -23,5 +23,5 @@ if __name__ == "__main__":
         news_item_alignment="H",
         collection="polygon_market_data_day",
     )
-    
+
     log.info("Completed summary calculations.")

@@ -41,7 +41,7 @@ def insert_data(
         }
     stop_on_key_violation (bool): Sets the "ordered" parameter which defines whether a process should stop when a key violation occurs. Defaults to True in which case the process will raise an error on key violations.
     max_retries (int): The maximum number of attempts to make at inserting the data. Defaults to 5.
-    
+
     Returns:
         InsertManyResult | None
     """
@@ -54,7 +54,7 @@ def insert_data(
         return None
 
     payload: list[InsertOne] = [InsertOne(doc) for doc in documents]
-    
+
     insertions = None
     attempt = 1
     while attempt <= max_retries:

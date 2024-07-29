@@ -19,12 +19,12 @@ from src.utils import log
 
 
 async def process_ticker(
-    mongo_client: MongoClient, 
-    polygon_client: RESTClient, 
-    ticker: str, 
-    timespan: str, 
-    from_: datetime, 
-    to: datetime, 
+    mongo_client: MongoClient,
+    polygon_client: RESTClient,
+    ticker: str,
+    timespan: str,
+    from_: datetime,
+    to: datetime,
     collection: str,
     semaphore: Semaphore,
 ) -> InsertManyResult | None:
@@ -78,7 +78,9 @@ async def populate_database_market_data(
     tasks: list[Task] = []
     for i, s in enumerate(tickers):
         if "C:" in s["ticker"] or "I:" in s["ticker"] or "X:" in s["ticker"]:
-            log.info("Ticker is a currency conversion (C:) or index (I:) or mutual (X:)")
+            log.info(
+                "Ticker is a currency conversion (C:) or index (I:) or mutual (X:)"
+            )
             continue
         log.info(f"Processing ticker {i + 1} of {N}")
         log.info(f"Processing: {s['ticker']}")
@@ -94,7 +96,7 @@ async def populate_database_market_data(
                 semaphore=Semaphore(batch_size),
             )
         )
-        
+
         if len(tasks) >= batch_size:
             batch_results = await gather(*tasks)
             results.extend([result for result in batch_results if result])

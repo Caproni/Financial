@@ -15,22 +15,22 @@ from src.utils import log
 
 
 if __name__ == "__main__":
-    
+
     log.info("Starting database population.")
-    
+
     mongo_client = create_mongo_client()
-    
+
     # news data
-    
+
     tickers = get_data(
         mongo_client,
         database="financial",
         collection="tickers",
         pipeline=None,
     )
-        
+
     N = len(tickers)
-    
+
     for i, ticker in enumerate(tickers):
         log.info(f"Processing ticker: {i + 1} of {N}")
         log.info(f"Processing: {ticker['ticker']}")
@@ -41,9 +41,9 @@ if __name__ == "__main__":
                 tickers=[ticker["ticker"]],
             )
         )
-    
+
     log.info("Deleting repeated data.")
-    
+
     delete_repeated_data(
         mongo_client=mongo_client,
         collection="ticker_news",

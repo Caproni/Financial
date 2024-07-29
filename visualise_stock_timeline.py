@@ -11,17 +11,17 @@ from src.utils import log
 
 
 if __name__ == "__main__":
-    
+
     log.info("Starting visualization.")
-    
+
     mongo_client = create_mongo_client()
 
     plot_history(
         mongo_client,
-        symbol="AAPL",
+        symbol="SHEL",
         news_flag=True,
         news_item_alignment="H",
         collection="polygon_market_data_day",
     )
-    
+
     log.info("Completed visualization.")

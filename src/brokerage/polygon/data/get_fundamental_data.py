@@ -34,7 +34,7 @@ def get_fundamental_data(
         list[dict[str, Any]]: A list of dictionaries representing bars.
     """
     log.info("Calling get_fundamental_data")
-    
+
     delta = get_delta(timespan)
 
     responses = []
@@ -46,7 +46,9 @@ def get_fundamental_data(
                 multiplier=multiplier,
                 timespan=timespan,
                 from_=start_datetime,
-                to=min(start_datetime + delta - timedelta(seconds=1), to),  # subtract a second to prevent double-counting,
+                to=min(
+                    start_datetime + delta - timedelta(seconds=1), to
+                ),  # subtract a second to prevent double-counting,
                 adjusted=True,
                 raw=False,
                 limit=50_000,

@@ -6,11 +6,15 @@
     "python.testing.pytestEnabled": true,
     "cSpell.words": [
         "aiohttp",
+        "coint",
         "dotenv",
         "iterrows",
+        "johansen",
         "pymongo",
+        "statsmodels",
         "timespan",
         "timespans",
+        "vecm",
         "vwap"
     ]
 }

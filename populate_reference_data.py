@@ -21,8 +21,8 @@ if __name__ == "__main__":
 
     # reference data
 
-    # exchanges_result = populate_database_exchanges()
-    # tickers_result = populate_database_tickers()
+    exchanges_result = populate_database_exchanges()
+    tickers_result = populate_database_tickers()
     related_companies_result = populate_database_related_companies()
 
     log.info("Completed database population.")

@@ -12,9 +12,9 @@ from src.utils import log
 
 
 if __name__ == "__main__":
-    
+
     log.info("Starting database population.")
-    
+
     mongo_client = create_mongo_client()
 
     # stock data
@@ -26,6 +26,6 @@ if __name__ == "__main__":
             timespan=timespan,
             collection=f"polygon_market_data_{timespan}",
         )
-    )    
+    )
 
     log.info("Completed database population.")

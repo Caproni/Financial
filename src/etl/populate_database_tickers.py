@@ -25,7 +25,7 @@ def populate_database_tickers() -> InsertManyResult:
         market=None,
         active=None,
     )
-    
+
     log.info(f"Obtained: {len(tickers)} tickers.")
 
     return insert_data(

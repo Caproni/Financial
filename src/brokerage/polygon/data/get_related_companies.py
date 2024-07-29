@@ -35,7 +35,4 @@ def get_related_companies(
         log.error(f"Error: {e}")
         raise e
 
-    return {
-        "symbol": ticker,
-        "tickers": [e.ticker for e in response]
-    }
+    return {"symbol": ticker, "tickers": [e.ticker for e in response]}

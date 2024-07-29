@@ -112,13 +112,13 @@ def plot_history(
                     dict(
                         args=["showlegend", False],
                         label="Hide Legend",
-                        method="relayout"
+                        method="relayout",
                     ),
                     dict(
                         args=["showlegend", True],
                         label="Show Legend",
-                        method="relayout"
-                    )
+                        method="relayout",
+                    ),
                 ],
                 "pad": {"r": 10, "t": 10},
                 "showactive": True,
@@ -142,9 +142,7 @@ def plot_history(
     for _, row in news_df.iterrows():
         log.info(f"Processing news article: {row['title']}")
         rounded_timestamp = row["published_utc"].round(news_item_alignment)
-        stocks_df["time_diff"] = (
-            stocks_df["timestamp"] - row["published_utc"]
-        ).abs()
+        stocks_df["time_diff"] = (stocks_df["timestamp"] - row["published_utc"]).abs()
         nearest_row = stocks_df.loc[stocks_df["time_diff"].idxmin()]
         stocks_df.drop(columns=["time_diff"], inplace=True)
         linked_stocks_df = nearest_row.to_frame().T
@@ -166,8 +164,11 @@ def plot_history(
                             ],
                             mode="markers+text",
                             marker=dict(
-                                color=sentiment_colors[insight["sentiment"]], size=10
+                                color=sentiment_colors[insight["sentiment"]],
+                                size=10,
                             ),
+                            hovertext=row["title"],
+                            hoverinfo="text",
                             textposition="top center",
                             name=row["title"] + f" ({row['published_utc']})",
                         )
@@ -187,11 +188,19 @@ def plot_history(
                     ],
                     mode="markers+text",
                     marker=dict(
-                        color=sentiment_colors["neutral"], size=10
+                        color=sentiment_colors["neutral"],
+                        size=10,
                     ),
+                    hovertext=row["title"],
+                    hoverinfo="text",
                     textposition="top center",
                     name=row["title"] + f" ({row['published_utc']})",
                 )
             )
+
+    fig.update_layout(
+        xaxis=dict(fixedrange=False),  # Allow zoom on the x-axis
+        yaxis=dict(fixedrange=False),  # Allow zoom on the y-axis
+    )
 
     fig.show()
