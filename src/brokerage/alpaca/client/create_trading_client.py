@@ -14,7 +14,7 @@ from src.utils import log
 def create_trading_client(
     paper: bool = True,
 ) -> TradingClient:
-    log.info("Calling create_trading_client")
+    log.function_call()
     load_dotenv()
     return TradingClient(
         api_key=getenv("ALPACA_PAPER_KEY") if paper else getenv("ALPACA_LIVE_KEY"),

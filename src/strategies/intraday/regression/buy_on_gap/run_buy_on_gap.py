@@ -22,7 +22,7 @@ def run_buy_on_gap(
     data_client: StockHistoricalDataClient,
     broker_client: BrokerClient,
 ) -> None:
-    log.info("Calling run_buy_on_gap")
+    log.function_call()
 
     rest_period = timedelta(minutes=15)
 

@@ -19,6 +19,6 @@ def calc_sharpe_ratio(
         risk_free_returns (float): Low-risk counter-factual returns for comparison
         sd_portfolio_excess_returns (float): Standard deviation of portfolio excess returns
     """
-    log.info("Calling calc_sharpe_ratio")
+    log.function_call()
 
     return (portfolio_returns - risk_free_returns) / sd_portfolio_excess_returns

@@ -28,7 +28,7 @@ def load_historical_data(
     Returns:
         dict[str, list[Any]]: Stock data retrieved from multiple files with the provided prefix
     """
-    log.info("Calling load_historical_data")
+    log.function_call()
 
     class DateTimeDecoder(JSONDecoder):
         def __init__(

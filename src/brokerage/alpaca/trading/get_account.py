@@ -13,5 +13,5 @@ from src.utils import log
 def get_account(
     client: BrokerClient,
 ):
-    log.info("Calling get_account")
+    log.function_call()
     return client.get_account()

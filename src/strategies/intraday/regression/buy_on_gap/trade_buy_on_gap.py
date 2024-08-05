@@ -33,7 +33,7 @@ def trade_buy_on_gap(
     Returns:
         list[dict[str, float]]: A list of trades made by this strategy
     """
-    log.info("Calling trade_buy_on_gap")
+    log.function_call()
 
     if not backtest_mode:
         assert (

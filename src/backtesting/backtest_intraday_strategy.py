@@ -29,7 +29,7 @@ def backtest_intraday_strategy(
     Returns:
         dict[str, Any]: A results set indicating the performance of the strategy
     """
-    log.info("Calling backtest_intraday_strategy")
+    log.function_call()
 
     universe = list(data.keys())
     start_datetime = datetime(2999, 1, 1, tzinfo=timezone.utc)

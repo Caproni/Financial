@@ -30,7 +30,7 @@ def list_ticker_news(
     Returns:
         list[dict[str, Any]]: A list of obtained news articles.
     """
-    log.info("Calling get_ticker_news")
+    log.function_call()
 
     try:
         response = client.list_ticker_news(

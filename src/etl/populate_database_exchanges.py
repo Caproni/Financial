@@ -4,33 +4,30 @@ Author: Edmund Bennett
 Copyright 2024
 """
 
-from pymongo.results import InsertManyResult
-
 from src.brokerage.polygon import (
     create_client,
     get_exchanges,
 )
-from src.mongo import insert_data, delete_data, create_mongo_client
+from src.sql import create_sql_client, unpack_simple_table, insert_data, Exchanges
 from src.utils import log
 
 
-def populate_database_exchanges() -> InsertManyResult:
-    log.info("Calling populate_database_exchanges")
+def populate_database_exchanges() -> bool:
+    log.function_call()
 
     polygon_client = create_client()
-    mongo_client = create_mongo_client()
+    database_client = create_sql_client()
 
     exchanges = get_exchanges(polygon_client)
 
-    delete_data(
-        mongo_client,
-        database="financial",
-        collection="exchanges",
+    log.info(f"Obtained: {len(exchanges)} exchanges.")
+
+    documents = unpack_simple_table(
+        collection=Exchanges,
+        data=exchanges,
     )
 
     return insert_data(
-        mongo_client,
-        database="financial",
-        collection="exchanges",
-        documents=exchanges,
+        database_client,
+        documents=documents,
     )

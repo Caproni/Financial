@@ -14,7 +14,7 @@ from src.utils import log
 def plot_drawdown_histogram(
     data: list[int | float],
 ):
-    log.info("Calling plot_drawdown_histogram")
+    log.function_call()
 
     drawdowns = get_drawdowns(data)
 

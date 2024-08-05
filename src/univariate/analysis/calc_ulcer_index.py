@@ -21,7 +21,7 @@ def calc_ulcer_index(
     Returns:
         float: The Ulcer index
     """
-    log.info("Calling calc_ulcer_index")
+    log.function_call()
 
     drawdowns = get_drawdowns(data)
 

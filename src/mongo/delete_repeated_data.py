@@ -28,7 +28,7 @@ def delete_repeated_data(
         None
     """
 
-    log.info("Calling delete_repeated_data")
+    log.function_call()
 
     repeated_articles = get_data(
         mongo_client,

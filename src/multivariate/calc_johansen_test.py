@@ -25,7 +25,7 @@ def calc_johansen_test(
     Returns:
         dict[str, str]: The results of the test.
     """
-    log.info("Calling calc_johansen_test")
+    log.function_call()
 
     df = pd.DataFrame(
         {

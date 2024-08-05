@@ -45,7 +45,7 @@ def insert_data(
     Returns:
         InsertManyResult | None
     """
-    log.info("Calling insert_data")
+    log.function_call()
     db = client[database]
     collection = db[collection]
 

@@ -22,7 +22,7 @@ def calc_mean_reversion_half_life(
     Returns:
         float: The half-life of mean reversion, in units of the input timeseries (i.e. a result of 36 for 15-minute data would indicate a half-life of 36 * 15 minutes = 9 hours)
     """
-    log.info("Calling calc_mean_reversion_half_life")
+    log.function_call()
 
     df = pd.DataFrame({"price": data})
 

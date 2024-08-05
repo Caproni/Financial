@@ -17,6 +17,6 @@ def calc_kelly_bet(
         p_win (float): Probability of a deal being profitable
         win_loss_ratio (float): Sum of profits divided by sum of losses
     """
-    log.info("Calling calc_kelly_bet")
+    log.function_call()
 
     return p_win - (1 - p_win) / win_loss_ratio

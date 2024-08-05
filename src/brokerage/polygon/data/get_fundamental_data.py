@@ -33,7 +33,7 @@ def get_fundamental_data(
     Returns:
         list[dict[str, Any]]: A list of dictionaries representing bars.
     """
-    log.info("Calling get_fundamental_data")
+    log.function_call()
 
     delta = get_delta(timespan)
 

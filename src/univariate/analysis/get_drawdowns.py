@@ -19,7 +19,7 @@ def get_drawdowns(
     Returns:
         dict[str, Any]: Dictionary describing the max drawdown value.
     """
-    log.info("Calling get_drawdowns")
+    log.function_call()
 
     drawdowns = []
     previous_datum = -1  # data values are assumed to be positive semi-definite

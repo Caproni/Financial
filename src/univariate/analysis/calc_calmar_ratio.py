@@ -23,7 +23,7 @@ def calc_calmar_ratio(
     Returns:
         float: The Calmar ratio
     """
-    log.info("Calling calc_calmar_ratio")
+    log.function_call()
 
     assert len(data) == len(
         ts

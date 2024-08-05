@@ -24,7 +24,7 @@ def get_orders(
     nested: bool | None = None,
     limit: int | None = None,
 ):
-    log.info("Calling get_orders")
+    log.function_call()
 
     try:
         return client.get_orders(

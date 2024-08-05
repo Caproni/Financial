@@ -18,7 +18,7 @@ def get_delta(timespan: str) -> timedelta:
     Returns:
         timedelta: A timedelta to use when querying data. i.e. from_=start_datetime, to=start_datetime + delta
     """
-    log.info("Calling get_delta")
+    log.function_call()
 
     assert timespan in {
         "second",

@@ -59,7 +59,7 @@ async def get_market_data(
     Returns:
         list[dict[str, Any]]: A list of dictionaries representing bars.
     """
-    log.info("Calling get_market_data")
+    log.function_call()
 
     assert timespan in {
         "second",
@@ -89,18 +89,18 @@ async def get_market_data(
                     to=to,
                 )
             )
-        
+
             start_datetime += delta
 
         except Exception as e:
             log.error(f"Error: {e}")
             raise e
-    
+
     responses: list[dict[str, Any]] = []
     if tasks:
         batch_results = await gather(*tasks)
         responses = [r for result in batch_results for r in result if result]
-    
+
     return [
         {
             "symbol": ticker,

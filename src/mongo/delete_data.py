@@ -28,7 +28,7 @@ def delete_data(
     Returns:
     - DeleteMany: The result of the delete operation.
     """
-    log.info("Calling delete_data")
+    log.function_call()
 
     if document_filter is None:
         document_filter = {}

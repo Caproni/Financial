@@ -13,6 +13,6 @@ from src.utils import log
 def get_clock(
     client: BrokerClient,
 ) -> Clock:
-    log.info("Calling get_clock")
+    log.function_call()
 
     return client.get_clock()

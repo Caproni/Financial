@@ -20,7 +20,7 @@ def close_position(
         client (TradingClient): A trading client
         symbol (str): A symbol. All open positions related to this symbol are closed.
     """
-    log.info("Calling close_position")
+    log.function_call()
     try:
         client.close_position(
             symbol_or_asset_id=symbol,

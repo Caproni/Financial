@@ -28,7 +28,7 @@ def close_positions_conditionally(
     Returns:
         bool: Whether or not all positions have been closed
     """
-    log.info("Calling close_positions_conditionally")
+    log.function_call()
     clock = get_clock(broker_client)
     if clock.is_open and clock.timestamp + within >= clock.next_close:
         log.info("Attempting to close all positions")

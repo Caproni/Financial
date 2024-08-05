@@ -20,7 +20,7 @@ if __name__ == "__main__":
         mongo_client,
         symbol="SHEL",
         news_flag=True,
-        news_item_alignment="H",
+        news_item_alignment="h",
         collection="polygon_market_data_day",
     )
 

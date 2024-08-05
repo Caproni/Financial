@@ -15,7 +15,7 @@ def get_moving_average(
     weighting: str,
     steps: int = None,
 ) -> tuple[list[float | int], list[float | int]]:
-    log.info("Calling get_moving_average")
+    log.function_call()
 
     if not data:
         log.warning("Input data vector is empty.")

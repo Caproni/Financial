@@ -19,7 +19,7 @@ def calc_average_drawdown(
     Returns:
         float: The average drawdown
     """
-    log.info("Calling calc_average_drawdown")
+    log.function_call()
 
     drawdowns = get_drawdowns(data)
 

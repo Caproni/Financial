@@ -24,7 +24,7 @@ async def process_ticker(
     published_utc_gte: datetime,
     published_utc_lt: datetime,
 ) -> list[dict[str, Any]]:
-    log.info("Calling process_ticker")
+    log.function_call()
     return await to_thread(
         list_ticker_news,
         polygon_client,
@@ -49,7 +49,7 @@ async def populate_database_ticker_news(
     Returns:
         list[InsertManyResult]: A list of insertion results for news data.
     """
-    log.info("Calling populate_database_ticker_news")
+    log.function_call()
 
     polygon_client = create_client()
     mongo_client = create_mongo_client()

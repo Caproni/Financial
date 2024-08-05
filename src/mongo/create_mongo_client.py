@@ -25,7 +25,7 @@ def create_mongo_client(
     Returns:
         MongoClient: A Mongo client ready to use.
     """
-    log.info("Calling create_mongo_client")
+    log.function_call()
     load_dotenv()
 
     if mongo_uri is None:
@@ -36,7 +36,8 @@ def create_mongo_client(
 
     return MongoClient(
         mongo_uri,
-        maxPoolSize=50,
+        maxPoolSize=20,
         minPoolSize=10,
-        waitQueueTimeoutMS=10000,
+        waitQueueTimeoutMS=10_000,
+        connectTimeoutMS=60_000,
     )

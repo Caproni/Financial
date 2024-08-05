@@ -4,9 +4,11 @@ Author: Edmund Bennett
 Copyright 2024
 """
 
+from .backup_collection_to_file import backup_collection_to_file
 from .populate_database_exchanges import populate_database_exchanges
 from .populate_database_market_data import populate_database_market_data
 from .populate_database_ticker_news import populate_database_ticker_news
 from .populate_database_tickers import populate_database_tickers
 from .populate_database_related_companies import populate_database_related_companies
 from .populate_database_statistical_data import populate_database_statistical_data
+from .restore_collection_from_file import restore_collection_from_file

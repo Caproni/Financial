@@ -25,7 +25,7 @@ def get_exchanges(
     Raises:
         Any exception that occurs during the API request.
     """
-    log.info("Calling get_exchanges")
+    log.function_call()
     try:
         response = client.get_exchanges()
     except Exception as e:

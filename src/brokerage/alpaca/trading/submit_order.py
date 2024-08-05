@@ -47,7 +47,7 @@ def submit_order(
     Returns:
         Order: A submitted order.
     """
-    log.info("Calling submit_order")
+    log.function_call()
 
     # create order
 

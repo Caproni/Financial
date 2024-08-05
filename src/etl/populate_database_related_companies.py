@@ -22,7 +22,7 @@ def populate_database_related_companies(
     Returns:
         int | None: Number of inserted documents or None if a failure occurred.
     """
-    log.info("Calling populate_database_related_companies")
+    log.function_call()
 
     polygon_client = create_client()
     mongo_client = create_mongo_client()

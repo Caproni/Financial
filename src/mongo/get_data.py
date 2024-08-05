@@ -32,7 +32,7 @@ def get_data(
     Returns:
         list[dict[str, Any]]: A list of documents
     """
-    log.info("Calling get_data")
+    log.function_call()
     db = client[database]
     collection = db[collection]
 

@@ -21,6 +21,6 @@ def get_calendar(
     Returns:
         list[Calendar]: A list of Calendar objects
     """
-    log.info("Calling get_calendar")
+    log.function_call()
 
     return client.get_calendar()

@@ -34,7 +34,7 @@ def get_stock_bars(
     Returns:
         BarSet: Historical dataset
     """
-    log.info("Calling get_stock_bars")
+    log.function_call()
 
     all_symbol_data: BarSet = {}
     for symbol in symbols:

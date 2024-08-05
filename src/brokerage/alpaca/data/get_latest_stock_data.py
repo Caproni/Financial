@@ -14,7 +14,7 @@ def get_latest_stock_data(
     historical_stock_client: StockHistoricalDataClient,
     symbols: list[str],
 ):
-    log.info("Calling get_latest_stock_data")
+    log.function_call()
 
     pagination_limit = 2000
     current = 0

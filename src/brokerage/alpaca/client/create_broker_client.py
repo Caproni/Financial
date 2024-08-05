@@ -14,7 +14,7 @@ from src.utils import log
 def create_broker_client(
     sandbox: bool = True,
 ) -> BrokerClient:
-    log.info("Calling create_broker_client")
+    log.function_call()
     load_dotenv()
     return BrokerClient(
         api_key=(

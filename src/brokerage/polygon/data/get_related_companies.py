@@ -23,7 +23,7 @@ def get_related_companies(
     Returns:
         dict[str, Any]: A dictionary of related companies.
     """
-    log.info("Calling get_related_companies")
+    log.function_call()
 
     try:
         response = client.get_related_companies(

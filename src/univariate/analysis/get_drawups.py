@@ -19,7 +19,7 @@ def get_drawups(
     Returns:
         dict[str, Any]: Dictionary describing the max drawup value.
     """
-    log.info("Calling get_drawups")
+    log.function_call()
 
     drawups = []
     previous_datum = 1_000_000_000  # data values are assumed to be positive semi-definite and smaller than this number

@@ -24,7 +24,7 @@ def get_snapshots(
     Returns:
         dict[str, Snapshot]: A dictionary of snapshots
     """
-    log.info("Calling get_snapshots")
+    log.function_call()
 
     pagination_limit = 20
     current = 0

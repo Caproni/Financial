@@ -16,7 +16,7 @@ def list_tickers(
     market: str | None = None,
     active: bool | None = None,
 ) -> list[dict[str, Any]]:
-    log.info("Calling list_tickers")
+    log.function_call()
 
     try:
         response = client.list_tickers(

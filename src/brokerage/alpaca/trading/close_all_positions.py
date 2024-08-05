@@ -20,7 +20,7 @@ def close_all_positions(
         client (TradingClient): A trading client
         cancel_orders (bool, optional): Whether to also cancel open orders. Defaults to True.
     """
-    log.info("Calling close_all_positions")
+    log.function_call()
     client.close_all_positions(
         cancel_orders=cancel_orders,
     )

@@ -18,7 +18,7 @@ def get_close_to_close_returns(
     start: datetime,
     end: datetime,
 ) -> dict[str, list[float]]:
-    log.info("Calling get_close_to_close_returns")
+    log.function_call()
     stock_bars = get_stock_bars(
         client=client,
         symbols=symbols,

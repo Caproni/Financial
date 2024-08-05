@@ -15,7 +15,7 @@ def plot_bollinger_bands(
     weighting: str = "linear",
     steps: int = 20,
 ):
-    log.info("Calling plot_bollinger_bands")
+    log.function_call()
 
     av, std = get_moving_average(
         data,

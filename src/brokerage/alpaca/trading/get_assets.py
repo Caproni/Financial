@@ -29,7 +29,7 @@ def get_assets(
     Returns:
         list[Asset]: A list of assets / symbols
     """
-    log.info("Calling get_assets")
+    log.function_call()
     try:
         return client.get_all_assets(
             filter=GetAssetsRequest(

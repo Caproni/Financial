@@ -20,7 +20,7 @@ def populate_database_statistical_data(
     steps: list[int],
     tickers: list[str] | None = None,
 ) -> list[int | None]:
-    log.info("Calling populate_database_statistical_data")
+    log.function_call()
 
     if tickers is None:
         tickers = get_data(

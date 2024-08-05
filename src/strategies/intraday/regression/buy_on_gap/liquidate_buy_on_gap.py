@@ -21,7 +21,7 @@ def liquidate_buy_on_gap(
     broker_client: BrokerClient,
     trading_client: TradingClient,
 ):
-    log.info("Calling liquidate_buy_on_gap")
+    log.function_call()
 
     rest_period = (timedelta(minutes=15),)
 

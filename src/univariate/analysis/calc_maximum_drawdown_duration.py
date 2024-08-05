@@ -23,7 +23,7 @@ def calc_maximum_drawdown_duration(
     Returns:
         dict[str, Any]: Dictionary describing the max drawdown duration.
     """
-    log.info("Calling calc_maximum_drawdown_duration")
+    log.function_call()
 
     if ts is not None:
         assert len(ts) == len(

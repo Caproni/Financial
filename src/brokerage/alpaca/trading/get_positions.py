@@ -13,7 +13,7 @@ from src.utils import log
 def get_positions(
     client: TradingClient,
 ):
-    log.info("Calling get_positions")
+    log.function_call()
 
     try:
         return client.get_all_positions()

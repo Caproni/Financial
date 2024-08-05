@@ -49,7 +49,7 @@ def prepare_buy_on_gap(
     Returns:
         dict[str, float]: Data used in the buy on gap model
     """
-    log.info("Calling prepare_buy_on_gap")
+    log.function_call()
 
     log.info("Getting symbols...")
 

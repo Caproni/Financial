@@ -37,7 +37,7 @@ def plot_history(
     Raises:
         AssertionError: If news_item_alignment is not 'D' or 'H'.
     """
-    log.info("Calling plot_history")
+    log.function_call()
 
     if news_item_alignment is None:
         news_item_alignment = "D"

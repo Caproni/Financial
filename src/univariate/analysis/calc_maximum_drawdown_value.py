@@ -18,7 +18,7 @@ def calc_maximum_drawdown_value(
     Returns:
         dict[str, Any]: Dictionary describing the max drawdown value.
     """
-    log.info("Calling calc_maximum_drawdown_value")
+    log.function_call()
 
     maximum_drawdown_max_index = None
     maximum_drawdown_min_index = None

@@ -12,7 +12,7 @@ from src.utils import log
 
 
 def create_client() -> RESTClient:
-    log.info("Calling create_client")
+    log.function_call()
 
     load_dotenv()
 
