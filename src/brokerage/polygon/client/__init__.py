@@ -4,4 +4,4 @@ Author: Edmund Bennett
 Copyright 2024
 """
 
-from .create_client import create_client
+from .create_polygon_client import create_polygon_client

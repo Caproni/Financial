@@ -7,14 +7,19 @@ Copyright 2024
 from typing import Any
 from asyncio import Task, to_thread, gather
 from polygon import RESTClient
-from pymongo.results import InsertManyResult
 from datetime import datetime, timedelta
 
 from src.brokerage.polygon import (
-    create_client,
+    create_polygon_client,
     list_ticker_news,
 )
-from src.mongo import insert_data, get_data, create_mongo_client
+from src.sql import (
+    insert_data,
+    get_data,
+    create_sql_client,
+    unpack_ticker_news,
+    Tickers,
+)
 from src.utils import log
 
 
@@ -38,7 +43,7 @@ async def populate_database_ticker_news(
     start_time: datetime,
     finish_time: datetime,
     tickers: list[str] | None = None,
-) -> list[InsertManyResult]:
+) -> list[bool]:
     """Populate database with news articles related to specific tickers.
 
     Args:
@@ -47,21 +52,19 @@ async def populate_database_ticker_news(
         tickers (list[str], optional): A list of tickers to process. Defaults to None in which case all tickers are obtained from database and processed.
 
     Returns:
-        list[InsertManyResult]: A list of insertion results for news data.
+        list[bool]: A list of insertion results for news data.
     """
     log.function_call()
 
-    polygon_client = create_client()
-    mongo_client = create_mongo_client()
+    polygon_client = create_polygon_client()
+    database_client = create_sql_client()
 
     offset_days = 300  # number of days in each asynchronous data request
 
     if tickers is None:
         tickers = get_data(
-            mongo_client,
-            database="financial",
-            collection="tickers",
-            pipeline=None,
+            database_client,
+            models=[Tickers],
         )
         tickers = [ticker["ticker"] for ticker in tickers]
 
@@ -69,7 +72,7 @@ async def populate_database_ticker_news(
 
     log.info(f"Processing: {N} tickers.")
 
-    insert_results: list[InsertManyResult] = []
+    insert_results: list[bool] = []
     for i, ticker in enumerate(tickers):
         log.info(f"Processing ticker: {i + 1} of {N}")
         log.info(f"Processing: {ticker}")
@@ -94,12 +97,10 @@ async def populate_database_ticker_news(
 
         batch_results = await gather(*tasks)
         if all_news := [b for batch in batch_results for b in batch if batch]:
+            documents = unpack_ticker_news(all_news)
             result = insert_data(
-                mongo_client,
-                database="financial",
-                collection="ticker_news",
-                documents=all_news,
-                stop_on_key_violation=False,
+                database_client,
+                documents=documents,
             )
 
             insert_results.append(result)

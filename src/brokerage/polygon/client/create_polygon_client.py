@@ -11,13 +11,18 @@ from os import getenv
 from src.utils import log
 
 
-def create_client() -> RESTClient:
+def create_polygon_client() -> RESTClient:
     log.function_call()
 
     load_dotenv()
 
     try:
-        return RESTClient(api_key=getenv("POLYGON_API_KEY"))
+        return RESTClient(
+            api_key=getenv("POLYGON_API_KEY"),
+            num_pools=100,
+            retries=5,
+            verbose=True,
+        )
     except Exception as e:
         log.warning("Could not create Polygon.io client")
         raise e

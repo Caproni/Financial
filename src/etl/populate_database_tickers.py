@@ -6,7 +6,7 @@ Copyright 2024
 
 from src.brokerage.polygon import (
     list_tickers,
-    create_client,
+    create_polygon_client,
 )
 from src.sql import create_sql_client, unpack_simple_table, insert_data, Tickers
 from src.utils import log
@@ -15,7 +15,7 @@ from src.utils import log
 def populate_database_tickers() -> bool:
     log.function_call()
 
-    polygon_client = create_client()
+    polygon_client = create_polygon_client()
     database_client = create_sql_client()
 
     tickers = list_tickers(

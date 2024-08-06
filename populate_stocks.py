@@ -15,9 +15,9 @@ if __name__ == "__main__":
 
     # stock data
 
-    timespan = "day"
+    timespan = "hour"
     collection_name = f"polygon_market_data_{timespan}"
-    
+
     if collection_name == "polygon_market_data_day":
         collection = PolygonMarketDataDay
     elif collection_name == "polygon_market_data_hour":

@@ -4,7 +4,6 @@ Author: Edmund Bennett
 Copyright 2024
 """
 
-from asyncio import run
 from asyncio import to_thread, Task, gather
 from typing import Any
 from polygon import RESTClient

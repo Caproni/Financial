@@ -33,14 +33,12 @@ def get_delta(timespan: str) -> timedelta:
 
     match timespan:
         case "second":  # 12-hour windows (base aggregation type is assumed second)
-            delta = timedelta(seconds=60 * 60 * 12)
+            return timedelta(seconds=60 * 60 * 12)
         case "minute":  # one-month windows (base aggregation type is minute)
-            delta = timedelta(days=30)
+            return timedelta(days=30)
         case "hour":  # one-month windows (base aggregation type is minute)
-            delta = timedelta(days=30)
+            return timedelta(days=30)
         case (
             "day" | "week" | "month" | "quarter" | "year"
         ):  # five-year windows (base aggregation type is day)
-            delta = timedelta(days=365 * 5)
-
-    return delta
+            return timedelta(days=365 * 5)

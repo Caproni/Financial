@@ -7,7 +7,7 @@ Copyright 2024
 from asyncio import run
 from datetime import datetime
 
-from src.mongo import create_mongo_client, get_data, delete_repeated_data
+from src.sql import create_sql_client, get_data, delete_repeated_data, Tickers
 from src.etl import (
     populate_database_ticker_news,
 )
@@ -18,15 +18,13 @@ if __name__ == "__main__":
 
     log.info("Starting database population.")
 
-    mongo_client = create_mongo_client()
+    database_client = create_sql_client()
 
     # news data
 
     tickers = get_data(
-        mongo_client,
-        database="financial",
-        collection="tickers",
-        pipeline=None,
+        database_client,
+        models=[Tickers],
     )
 
     N = len(tickers)
@@ -45,7 +43,7 @@ if __name__ == "__main__":
     log.info("Deleting repeated data.")
 
     delete_repeated_data(
-        mongo_client=mongo_client,
+        mongo_client=database_client,
         collection="ticker_news",
         field="polygon_id",
     )

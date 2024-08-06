@@ -5,7 +5,7 @@ Copyright 2024
 """
 
 from src.brokerage.polygon import (
-    create_client,
+    create_polygon_client,
     get_exchanges,
 )
 from src.sql import create_sql_client, unpack_simple_table, insert_data, Exchanges
@@ -15,7 +15,7 @@ from src.utils import log
 def populate_database_exchanges() -> bool:
     log.function_call()
 
-    polygon_client = create_client()
+    polygon_client = create_polygon_client()
     database_client = create_sql_client()
 
     exchanges = get_exchanges(polygon_client)

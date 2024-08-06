@@ -6,8 +6,14 @@ Copyright 2024
 
 from typing import Any
 
-from src.brokerage.polygon import create_client, get_related_companies
-from src.mongo import get_data, insert_data, create_mongo_client
+from src.brokerage.polygon import create_polygon_client, get_related_companies
+from src.sql import (
+    get_data,
+    insert_data,
+    create_sql_client,
+    Tickers,
+    unpack_related_companies,
+)
 from src.utils import log
 
 
@@ -24,15 +30,13 @@ def populate_database_related_companies(
     """
     log.function_call()
 
-    polygon_client = create_client()
-    mongo_client = create_mongo_client()
+    polygon_client = create_polygon_client()
+    database_client = create_sql_client()
 
     if tickers is None:
         tickers = get_data(
-            client=mongo_client,
-            database="financial",
-            collection="tickers",
-            pipeline=None,
+            client=database_client,
+            models=[Tickers],
         )
         tickers = [ticker["ticker"] for ticker in tickers]
 
@@ -48,9 +52,9 @@ def populate_database_related_companies(
         )
         results.append(related_companies)
 
+    documents = unpack_related_companies(related_companies)
+
     return insert_data(
-        client=mongo_client,
-        database="financial",
-        collection="related_companies",
-        documents=results,
+        client=database_client,
+        documents=documents,
     )

@@ -10,9 +10,16 @@ from datetime import datetime, timedelta
 
 from src.brokerage.polygon import (
     get_market_data,
-    create_client,
+    create_polygon_client,
 )
-from src.sql import insert_data, get_data, create_sql_client, unpack_simple_table, Tickers, PolygonMarketDataDay
+from src.sql import (
+    insert_data,
+    get_data,
+    create_sql_client,
+    unpack_simple_table,
+    Tickers,
+    PolygonMarketDataDay,
+)
 from src.utils import log
 
 
@@ -22,7 +29,7 @@ def populate_database_market_data(
 ) -> list[bool]:
     log.function_call()
 
-    polygon_client = create_client()
+    polygon_client = create_polygon_client()
     database_client = create_sql_client()
 
     tickers = get_data(
