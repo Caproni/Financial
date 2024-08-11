@@ -4,7 +4,7 @@ Author: Edmund Bennett
 Copyright 2024
 """
 
-from sqlalchemy import Column, Boolean, Integer, String, TIMESTAMP, Float
+from sqlalchemy import Column, Boolean, Integer, String, TIMESTAMP, Float, UUID
 from ..client import Base
 
 
@@ -37,3 +37,4 @@ class PolygonMarketDataHour(Base):
     transactions = Column(Integer, nullable=True)
     volume = Column(Integer, nullable=True)
     vwap = Column(Float, nullable=True)
+    data_id = Column(UUID, nullable=False)

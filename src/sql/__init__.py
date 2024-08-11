@@ -19,6 +19,7 @@ from .dto import (
 )
 from .func import (
     get_data,
+    delete_data,
     insert_data,
     unpack_simple_table,
     unpack_related_companies,

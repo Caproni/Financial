@@ -1,16 +1,23 @@
 {
     "python.testing.pytestArgs": [
-        "tests"
+        "src/tests"
     ],
     "python.testing.unittestEnabled": false,
     "python.testing.pytestEnabled": true,
     "cSpell.words": [
         "aiohttp",
         "autoflush",
+        "Backtest",
+        "backtesting",
+        "bollinger",
+        "cadf",
         "coint",
         "dotenv",
         "iterrows",
         "johansen",
+        "linregress",
+        "lookback",
+        "macd",
         "pymongo",
         "sessionmaker",
         "sqlalchemy",

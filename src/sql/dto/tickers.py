@@ -4,7 +4,7 @@ Author: Edmund Bennett
 Copyright 2024
 """
 
-from sqlalchemy import Column, Boolean, String
+from sqlalchemy import Column, Boolean, String, UUID
 from ..client import Base
 
 
@@ -41,3 +41,4 @@ class Tickers(Base):
     composite_figi = Column(String, nullable=True)
     share_class_figi = Column(String, nullable=True)
     last_updated_utc = Column(String, nullable=True)
+    ticker_id = Column(UUID, nullable=False)

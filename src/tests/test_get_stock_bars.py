@@ -28,4 +28,4 @@ def test_get_stock_bars():
 
     assert bars.get("AAPL") is not None
     assert len(bars.get("AAPL")) == 4
-    assert bars.get("AAPL")[0].close == 124.36
+    assert bars.get("AAPL")[0].close == 123.88

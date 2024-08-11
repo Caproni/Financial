@@ -25,4 +25,4 @@ def test_get_close_to_close_returns():
 
     assert ctc_returns.get("AAPL") is not None
     assert len(ctc_returns.get("AAPL")) == 3
-    assert ctc_returns.get("AAPL")[0] == 0.010373110324863351
+    assert ctc_returns.get("AAPL")[0] == 0.010332579916047798

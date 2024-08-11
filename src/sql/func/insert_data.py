@@ -5,6 +5,7 @@ Copyright 2024
 """
 
 from typing import Any
+
 from ..client import DatabaseClient
 from src.utils import log
 

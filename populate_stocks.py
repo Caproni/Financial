@@ -13,8 +13,6 @@ if __name__ == "__main__":
 
     log.info("Starting database population.")
 
-    # stock data
-
     timespan = "hour"
     collection_name = f"polygon_market_data_{timespan}"
 

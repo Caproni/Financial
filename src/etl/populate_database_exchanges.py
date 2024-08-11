@@ -13,6 +13,12 @@ from src.utils import log
 
 
 def populate_database_exchanges() -> bool:
+    """
+    Populates the database with exchange information.
+
+    Returns:
+        A boolean value indicating the success of data population for exchanges.
+    """
     log.function_call()
 
     polygon_client = create_polygon_client()

@@ -1,11 +1,12 @@
 #!/usr/local/bin/python
 """
 Author: Edmund Bennett
-Copyright 2023
+Copyright 2024
 """
 
-import matplotlib.pyplot as plt
+import plotly.graph_objects as go
 from math import sqrt, floor
+from datetime import datetime
 
 from ..analysis.get_drawdowns import get_drawdowns
 from src.utils import log
@@ -18,10 +19,16 @@ def plot_drawdown_histogram(
 
     drawdowns = get_drawdowns(data)
 
-    plt.hist(
-        drawdowns,
-        bins=floor(sqrt(len(drawdowns))),
+    num_bins = floor(sqrt(len(drawdowns)))
+
+    fig = go.Figure(data=[go.Histogram(x=drawdowns, nbinsx=num_bins)])
+
+    fig.update_layout(
+        title="Drawdown Histogram",
+        xaxis_title="Drawdown",
+        yaxis_title="Frequency",
+        plot_bgcolor="white",
+        paper_bgcolor="white",
     )
-    plt.xlabel("Drawdown")
-    plt.ylabel("Frequency")
-    plt.show()
+
+    fig.show()

@@ -18,7 +18,6 @@ from src.sql import (
     create_sql_client,
     unpack_simple_table,
     Tickers,
-    PolygonMarketDataDay,
 )
 from src.utils import log
 
@@ -27,6 +26,16 @@ def populate_database_market_data(
     timespan: str,
     collection: Any,
 ) -> list[bool]:
+    """
+    Populates the database with market data for a given timespan and collection.
+
+    Args:
+        timespan: A string specifying the timespan for market data retrieval.
+        collection: Any type representing the database collection to populate.
+
+    Returns:
+        A list of boolean values indicating the success of data population for each ticker.
+    """
     log.function_call()
 
     polygon_client = create_polygon_client()
@@ -53,11 +62,11 @@ def populate_database_market_data(
         result = None
         if historical_bars := run(
             get_market_data(
-                polygon_client,
-                s["ticker"],
-                now - timedelta(days=365 * 5 + 1),
-                now - timedelta(days=1),
-                timespan,
+                client=polygon_client,
+                ticker=s["ticker"],
+                from_=now - timedelta(days=365 * 5 + 1),
+                to=now - timedelta(days=1),
+                timespan=timespan,
             )
         ):
             log.info(f"Data obtained for symbol: {s['ticker']}")

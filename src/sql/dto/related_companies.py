@@ -4,7 +4,7 @@ Author: Edmund Bennett
 Copyright 2024
 """
 
-from sqlalchemy import Column, Boolean, String
+from sqlalchemy import Column, String, UUID
 from ..client import Base
 
 
@@ -21,3 +21,4 @@ class RelatedCompanies(Base):
 
     symbol = Column(String, primary_key=True, nullable=False)
     ticker = Column(String, primary_key=True, nullable=False)
+    related_company_id = Column(UUID, nullable=False)

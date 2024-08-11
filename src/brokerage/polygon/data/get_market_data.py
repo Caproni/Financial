@@ -29,8 +29,8 @@ async def get_market_data_async(
         timespan=timespan,
         from_=start_datetime,
         to=min(
-            start_datetime + delta - timedelta(seconds=1), to
-        ),  # subtract a second to prevent double-counting,
+            start_datetime + delta - timedelta(days=1), to
+        ),  # subtract a day to prevent double-counting,
         adjusted=True,
         raw=False,
         limit=50_000,
@@ -84,7 +84,7 @@ async def get_market_data(
                     timespan=timespan,
                     delta=delta,
                     multiplier=multiplier,
-                    start_datetime=from_,
+                    start_datetime=start_datetime,
                     to=to,
                 )
             )

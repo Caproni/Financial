@@ -6,7 +6,7 @@ Copyright 2023
 
 from datetime import datetime, timedelta
 
-from ...utils.logger import logger as log
+from src.utils import log
 
 
 def calc_average_annualized_return(
