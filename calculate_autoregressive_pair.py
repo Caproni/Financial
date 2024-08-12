@@ -27,7 +27,7 @@ if __name__ == "__main__":
     database_client = create_sql_client()
 
     start_date = datetime(2024, 4, 1)
-    end_date = datetime(2024, 6, 15)
+    end_date = datetime(2024, 7, 15)
 
     table = PolygonMarketDataDay
 
@@ -70,17 +70,24 @@ if __name__ == "__main__":
         {
             "KMI": close_1,
             "TRP": close_2,
-        }
+        },
+        timestamps=timestamps_1,
     )
 
-    plot_bollinger_bands(data=close_1)
+    plot_bollinger_bands(
+        data=close_1,
+        timestamps=timestamps_1,
+    )
 
     plot_macd(
         *calc_macd(data=close_1),
         timestamps=timestamps_1,
     )
 
-    plot_bollinger_bands(data=close_2)
+    plot_bollinger_bands(
+        data=close_2,
+        timestamps=timestamps_2,
+    )
 
     plot_macd(
         *calc_macd(data=close_2),
@@ -103,14 +110,13 @@ if __name__ == "__main__":
         data_2=close_2,
     )
 
-    scaled_close_1 = [-e * linear_regression_results["slope"] for e in close_1]
-
-    stationary = scaled_close_1 + close_2
+    stationary = [linear_regression_results["slope"] * x - y for x, y in zip(close_1, close_2)]
 
     plot_time_series(
         {
             "Stationary": stationary,
-        }
+        },
+        timestamps=timestamps_1,
     )
 
     log.info("Completed multivariate analysis.")

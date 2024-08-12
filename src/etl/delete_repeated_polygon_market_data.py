@@ -41,6 +41,7 @@ def delete_repeated_polygon_market_data():
                 
                 rows_to_delete = get_data(
                     database_client=database_client,
+                    models=[collection],
                     where_clause=and_(
                         collection.symbol == symbol,
                         collection.timestamp == timestamp
@@ -48,14 +49,16 @@ def delete_repeated_polygon_market_data():
                 )
                 
                 # Keep the first row and delete the rest
+                data_ids: list[str] = []
                 for row in rows_to_delete[1:]:
-                    delete_data(
-                        database_client,
-                        where
-                    )
-                    db.delete(row)
-            
-            db.commit()
+                    data_ids.append(row.data_id)
+
+                delete_data(
+                    database_client,
+                    model=[collection],
+                    where_clause=and_(collection.data_id.in_(data_ids))
+                )
+
             log.info("Successfully deleted duplicate rows.")
         except Exception as e:
             db.rollback()
