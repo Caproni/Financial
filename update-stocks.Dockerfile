@@ -13,6 +13,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
     cmake \
     gfortran \
+    pkg-config \
+    libopenblas-dev \
+    liblapack-dev \
     libatlas-base-dev \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*

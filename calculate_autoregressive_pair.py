@@ -70,6 +70,7 @@ if __name__ == "__main__":
             symbol_1: (timestamps_1, close_1),
             symbol_2: (timestamps_2, close_2),
         },
+        title=f"Time-series of {symbol_1} and {symbol_2}",
     )
 
     plot_bollinger_bands(
