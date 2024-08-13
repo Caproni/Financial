@@ -49,9 +49,11 @@ if __name__ == "__main__":
 
         rows_to_delete.pop(0)
 
-        delete_data(
-            database_client,
-            rows_to_delete=rows_to_delete,
-        )
+        if rows_to_delete:
+            log.info(f"Deleting: {len(rows_to_delete)} rows.")
+            delete_data(
+                database_client,
+                rows_to_delete=rows_to_delete,
+            )
 
     log.info("Completed deleting duplicate rows.")

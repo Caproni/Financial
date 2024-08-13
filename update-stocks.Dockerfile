@@ -22,7 +22,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 WORKDIR /code
 
-RUN apt install cmake
+RUN pip install --upgrade pip setuptools wheel
 
 COPY requirements.txt /code/requirements.txt
 
