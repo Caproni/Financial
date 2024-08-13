@@ -6,12 +6,15 @@ LABEL entrypoint "update_stocks.py"
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     software-properties-common \
     wget \
     git \
     cmake \
+    gfortran \
+    libatlas-base-dev \
+    && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /code
