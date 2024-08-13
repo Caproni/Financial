@@ -4,18 +4,21 @@ Author: Edmund Bennett
 Copyright 2024
 """
 
+from os.path import abspath, join, dirname
 import plotly.graph_objects as go
+import plotly.offline as pyo
+
 from src.utils import log
 
 
 def plot_histogram(
     time_series_dict,
-    title="Histogram",
-    xaxis_title="Values",
-    yaxis_title="Count",
-):
+    xaxis_title: str = "Values",
+    yaxis_title: str = "Count",
+    title: str = "Histogram",
+) -> str:
     """
-    Plot an arbitrary number of histograms using Plotly.
+    Plot an arbitrary number of histograms.
 
     Parameters:
     - time_series_dict: A dictionary where the keys are the names of the time-series, and the values are lists or arrays of the data points.
@@ -49,4 +52,12 @@ def plot_histogram(
         barmode="overlay",  # Overlay histograms for better comparison
     )
 
-    fig.show()
+    path_to_output = abspath(
+        join(dirname(__file__), "../../../staging", f"{title}.html")
+    )
+    pyo.plot(
+        fig,
+        filename=path_to_output,
+        auto_open=True,
+    )
+    return path_to_output

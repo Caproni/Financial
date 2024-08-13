@@ -6,7 +6,7 @@ Copyright 2023
 
 import numpy as np
 
-from ..multivariate.calc_johansen_test import calc_johansen_test
+from ..multivariate.analysis.calc_johansen_test import calc_johansen_test
 
 
 def test_calc_johansen_test():

@@ -75,21 +75,25 @@ if __name__ == "__main__":
     plot_bollinger_bands(
         data=close_1,
         timestamps=timestamps_1,
+        title=f"Bollinger Bands {symbol_1}",
     )
 
     plot_macd(
         *calc_macd(data=close_1),
         timestamps=timestamps_1,
+        title=f"MACD {symbol_1}",
     )
 
     plot_bollinger_bands(
         data=close_2,
         timestamps=timestamps_2,
+        title=f"Bollinger Bands {symbol_2}",
     )
 
     plot_macd(
         *calc_macd(data=close_2),
         timestamps=timestamps_2,
+        title=f"MACD {symbol_2}",
     )
 
     johansen_test_result = calc_johansen_test(
@@ -117,6 +121,7 @@ if __name__ == "__main__":
             "Stationary": stationary,
         },
         timestamps=timestamps_1,
+        title=f"Stationary time-series of {symbol_1} and {symbol_2}",
     )
 
     log.info("Completed multivariate analysis.")

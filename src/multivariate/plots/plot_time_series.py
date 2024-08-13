@@ -4,19 +4,22 @@ Author: Edmund Bennett
 Copyright 2024
 """
 
+from os.path import abspath, join, dirname
 import plotly.graph_objects as go
+import plotly.offline as pyo
 from datetime import datetime
+
 from src.utils import log
 
 
 def plot_time_series(
     time_series_dict: dict[str, tuple[list[float], list[datetime]]],
-    title="Time-Series Plot",
+    title: str = "Time-Series Plot",
     xaxis_title="Time",
     yaxis_title="Value",
-):
+) -> str:
     """
-    Plot an arbitrary number of time-series using Plotly.
+    Plot an arbitrary number of time-series.
 
     Parameters:
     - time_series_dict: A dictionary where the keys are the names of the time-series, and the values are tuples of (timestamps, series_data).
@@ -51,7 +54,7 @@ def plot_time_series(
     )
 
     # Add vertical lines for each new week if timestamps are provided
-    for series_name, (timestamps, _) in time_series_dict.items():
+    for timestamps, _ in time_series_dict.values():
         if timestamps:
             weeks_seen = set()
             for timestamp in timestamps:
@@ -60,4 +63,12 @@ def plot_time_series(
                     fig.add_vline(x=timestamp, line=dict(color="black", dash="dash"))
                     weeks_seen.add(year_week)
 
-    fig.show()
+    path_to_output = abspath(
+        join(dirname(__file__), "../../../staging", f"{title}.html")
+    )
+    pyo.plot(
+        fig,
+        filename=path_to_output,
+        auto_open=True,
+    )
+    return path_to_output

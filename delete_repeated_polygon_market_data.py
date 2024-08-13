@@ -46,7 +46,7 @@ if __name__ == "__main__":
                 collection.timestamp == timestamp,
             ),
         )
-        
+
         rows_to_delete.pop(0)
 
         delete_data(

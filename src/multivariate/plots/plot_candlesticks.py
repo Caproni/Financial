@@ -4,7 +4,9 @@ Author: Edmund Bennett
 Copyright 2024
 """
 
+from os.path import abspath, join, dirname
 import plotly.graph_objects as go
+import plotly.offline as pyo
 from plotly.subplots import make_subplots
 from datetime import datetime
 
@@ -12,10 +14,11 @@ from src.utils import log
 
 
 def plot_candlesticks(
-    tickers_data: dict[str, dict[str, list[float | int | datetime]]]
-):
+    tickers_data: dict[str, dict[str, list[float | int | datetime]]],
+    title: str | None = None,
+) -> str:
     """
-    Plot candlestick charts for multiple stock tickers using Plotly.
+    Plot candlestick charts for multiple stock tickers.
 
     Parameters:
     tickers_data (dict): A dictionary where the key is the ticker name, and the value is a dictionary
@@ -38,8 +41,14 @@ def plot_candlesticks(
             'Close': [close1, close2, ...],
         }
     }
+
+    Returns:
+    - fig: A Plotly figure object that can be shown or saved.
     """
     log.function_call()
+
+    if title is None:
+        title = f"Candlestick Charts for: {", ".join(tickers_data.keys())}"
 
     num_tickers = len(tickers_data)
 
@@ -55,22 +64,31 @@ def plot_candlesticks(
     for i, (ticker, data) in enumerate(tickers_data.items(), start=1):
         fig.add_trace(
             go.Candlestick(
-                x=data['Datetime'],
-                open=data['Open'],
-                high=data['High'],
-                low=data['Low'],
-                close=data['Close'],
-                name=ticker
+                x=data["Datetime"],
+                open=data["Open"],
+                high=data["High"],
+                low=data["Low"],
+                close=data["Close"],
+                name=ticker,
             ),
-            row=i, col=1
+            row=i,
+            col=1,
         )
 
     fig.update_layout(
-        title=f"Candlestick Charts for: {", ".join(tickers_data.keys())}",
+        title=title,
         xaxis_title="Datetime",
         yaxis_title="Price",
         xaxis_rangeslider_visible=False,
-        height=300 * num_tickers
+        height=300 * num_tickers,
     )
 
-    fig.show()
+    path_to_output = abspath(
+        join(dirname(__file__), "../../../staging", f"{title}.html")
+    )
+    pyo.plot(
+        fig,
+        filename=path_to_output,
+        auto_open=True,
+    )
+    return path_to_output

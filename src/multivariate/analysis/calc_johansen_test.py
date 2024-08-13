@@ -7,7 +7,7 @@ Copyright 2024
 import pandas as pd
 from statsmodels.tsa.vector_ar.vecm import coint_johansen
 
-from ..utils.logger import logger as log
+from ...utils.logger import logger as log
 
 
 def calc_johansen_test(

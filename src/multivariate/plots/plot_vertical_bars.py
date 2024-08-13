@@ -4,20 +4,23 @@ Author: Edmund Bennett
 Copyright 2024
 """
 
+from os.path import abspath, join, dirname
 import plotly.graph_objects as go
+import plotly.offline as pyo
 from datetime import datetime
+
 from src.utils import log
 
 
 def plot_vertical_bars(
     time_series_dict,
-    title="Bar Chart",
-    xaxis_title="Categories",
-    yaxis_title="Values",
+    title: str = "Bar Chart",
+    xaxis_title: str = "Categories",
+    yaxis_title: str = "Values",
     timestamps: list[datetime] = None,
-):
+) -> str:
     """
-    Plot an arbitrary number of vertical bar charts using Plotly.
+    Plot an arbitrary number of vertical bar charts.
 
     Parameters:
     - time_series_dict: A dictionary where the keys are the names of the time-series, and the values are lists or arrays of the data points.
@@ -52,4 +55,12 @@ def plot_vertical_bars(
         barmode="group",  # Group bars together for comparison
     )
 
-    fig.show()
+    path_to_output = abspath(
+        join(dirname(__file__), "../../../staging", f"{title}.html")
+    )
+    pyo.plot(
+        fig,
+        filename=path_to_output,
+        auto_open=True,
+    )
+    return path_to_output

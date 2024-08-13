@@ -4,8 +4,11 @@ Author: Edmund Bennett
 Copyright 2024
 """
 
+from os.path import abspath, join, dirname
 import plotly.graph_objects as go
+import plotly.offline as pyo
 from datetime import datetime
+
 from src.utils import log
 
 
@@ -15,7 +18,8 @@ def plot_macd(
     macd_histogram: list[float],
     macd_histogram_derivative: list[float],
     timestamps: list[datetime] = None,
-):
+    title: str = "MACD, Signal Line, MACD Histogram, and MACD Histogram Derivative",
+) -> str:
     """
     Plots the MACD, Signal Line, MACD Histogram, and the first derivative of the MACD Histogram.
 
@@ -25,6 +29,7 @@ def plot_macd(
         macd_histogram: A list of floats representing the MACD Histogram values.
         macd_histogram_derivative: A list of floats representing the first derivative of the MACD Histogram values.
         timestamps: An optional list of datetime objects representing the time points for each value.
+        title: (str, optional): Title and filename for saved html file.
     """
 
     log.function_call()
@@ -32,7 +37,7 @@ def plot_macd(
     fig = go.Figure()
 
     x_values = timestamps or list(range(len(macd)))
-    
+
     # Plot MACD line
     fig.add_trace(
         go.Scatter(
@@ -78,7 +83,7 @@ def plot_macd(
 
     # Update layout with white background
     fig.update_layout(
-        title="MACD, Signal Line, MACD Histogram, and MACD Histogram Derivative",
+        title=title,
         xaxis_title="Time",
         yaxis_title="Value",
         legend_title="Legend",
@@ -96,4 +101,12 @@ def plot_macd(
                 fig.add_vline(x=timestamp, line=dict(color="black", dash="dash"))
                 weeks_seen.add(year_week)
 
-    fig.show()
+    path_to_output = abspath(
+        join(dirname(__file__), "../../../staging", f"{title}.html")
+    )
+    pyo.plot(
+        fig,
+        filename=path_to_output,
+        auto_open=True,
+    )
+    return path_to_output

@@ -4,8 +4,11 @@ Author: Edmund Bennett
 Copyright 2024
 """
 
+from os.path import abspath, join, dirname
 import plotly.graph_objects as go
+import plotly.offline as pyo
 from datetime import datetime
+
 from src.univariate.analysis.calc_linear_moving_average import (
     calc_linear_moving_average,
 )
@@ -16,14 +19,20 @@ def plot_bollinger_bands(
     data: list[int | float],
     steps: int = 20,
     timestamps: list[datetime] = None,
-):
+    title: str = "Bollinger Bands",
+) -> str:
     """Plots a time-series and Bollinger Bands for that time-series.
 
     Args:
         data (list[int | float]): Input time-series.
         steps (int, optional): Steps to use in calculation of moving averages. Defaults to 20.
         timestamps (list[datetime], optional): Optional list of datetime objects for the x-axis.
+        title: (str, optional): Title and filename for saved html file.
+
+    Returns:
+        Path to a generated html file containing the plot.
     """
+
     log.function_call()
 
     av, std = calc_linear_moving_average(
@@ -33,10 +42,7 @@ def plot_bollinger_bands(
 
     fig = go.Figure()
 
-    if timestamps:
-        x_values = timestamps
-    else:
-        x_values = list(range(len(data)))
+    x_values = timestamps or list(range(len(data)))
 
     fig.add_trace(
         go.Scatter(
@@ -81,7 +87,7 @@ def plot_bollinger_bands(
     )
 
     fig.update_layout(
-        title="Bollinger Bands",
+        title=title,
         xaxis_title="Time",
         yaxis_title="Price",
         plot_bgcolor="white",
@@ -97,4 +103,12 @@ def plot_bollinger_bands(
                 fig.add_vline(x=timestamp, line=dict(color="black", dash="dash"))
                 weeks_seen.add(year_week)
 
-    fig.show()
+    path_to_output = abspath(
+        join(dirname(__file__), "../../../staging", f"{title}.html")
+    )
+    pyo.plot(
+        fig,
+        filename=path_to_output,
+        auto_open=True,
+    )
+    return path_to_output

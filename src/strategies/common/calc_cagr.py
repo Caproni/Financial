@@ -23,6 +23,8 @@ def calculate_cagr(
     log.function_call()
 
     if initial_value <= 0 or final_value <= 0 or periods <= 0:
-        raise ValueError("Initial value, final value, and periods must be greater than zero.")
-    
+        raise ValueError(
+            "Initial value, final value, and periods must be greater than zero."
+        )
+
     return (final_value / initial_value) ** (1 / periods) - 1
