@@ -1,1 +1,1 @@
-docker build -f ../update-stocks.Dockerfile -t update-stocks:latest
+podman build -f ../update-stocks.Dockerfile -t update-stocks:latest
