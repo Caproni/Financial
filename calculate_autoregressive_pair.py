@@ -15,9 +15,9 @@ from src.sql import (
 )
 from src.univariate.analysis import calc_macd
 from src.multivariate import calc_johansen_test, calc_linear_regression, calc_cadf
-from src.multivariate.plots import plot_time_series
+from src.multivariate.plots import plot_time_series, plot_vertical_bars
 from src.univariate.plots import plot_bollinger_bands, plot_macd
-from src.utils import log
+from src.utils import log, align_time_series
 
 
 if __name__ == "__main__":
@@ -26,16 +26,18 @@ if __name__ == "__main__":
 
     database_client = create_sql_client()
 
-    start_date = datetime(2024, 4, 1)
+    start_date = datetime(2024, 6, 1)
     end_date = datetime(2024, 7, 15)
 
-    table = PolygonMarketDataDay
+    table = PolygonMarketDataHour
+    symbol_1 = "GOOG"
+    symbol_2 = "GOOGL"
 
     data_1 = get_data(
         database_client,
         models=[table],
         where_clause=and_(
-            table.symbol == "KMI",
+            table.symbol == symbol_1,
             table.timestamp >= start_date,
             table.timestamp <= end_date,
         ),
@@ -45,33 +47,29 @@ if __name__ == "__main__":
         database_client,
         models=[table],
         where_clause=and_(
-            table.symbol == "TRP",
+            table.symbol == symbol_2,
             table.timestamp >= start_date,
             table.timestamp <= end_date,
         ),
     )
-    
-    N1 = len(data_1)
-    N2 = len(data_2)
-    
-    if N1 > N2:
-        log.warning("Arrays not of same length. Truncating first time-series.")
-        data_1 = data_1[:N2]
-    elif N2 > N1:
-        log.warning("Arrays not of same length. Truncating second time-series.")
-        data_2 = data_2[:N1]
 
     close_1 = [e["close"] for e in data_1]
     timestamps_1 = [e["timestamp"] for e in data_1]
     close_2 = [e["close"] for e in data_2]
     timestamps_2 = [e["timestamp"] for e in data_2]
 
+    timestamps, close_1, close_2 = align_time_series(
+        datetime1=timestamps_1,
+        values1=close_1,
+        datetime2=timestamps_2,
+        values2=close_2,
+    )
+
     plot_time_series(
         {
-            "KMI": close_1,
-            "TRP": close_2,
+            symbol_1: (timestamps_1, close_1),
+            symbol_2: (timestamps_2, close_2),
         },
-        timestamps=timestamps_1,
     )
 
     plot_bollinger_bands(
@@ -110,9 +108,11 @@ if __name__ == "__main__":
         data_2=close_2,
     )
 
-    stationary = [linear_regression_results["slope"] * x - y for x, y in zip(close_1, close_2)]
+    stationary = [
+        linear_regression_results["slope"] * x - y for x, y in zip(close_1, close_2)
+    ]
 
-    plot_time_series(
+    plot_vertical_bars(
         {
             "Stationary": stationary,
         },

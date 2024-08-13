@@ -8,19 +8,22 @@ import plotly.graph_objects as go
 from datetime import datetime
 from src.utils import log
 
+
 def plot_macd(
     macd: list[float],
     signal_line: list[float],
     macd_histogram: list[float],
+    macd_histogram_derivative: list[float],
     timestamps: list[datetime] = None,
 ):
     """
-    Plots the MACD, Signal Line, and MACD Histogram.
+    Plots the MACD, Signal Line, MACD Histogram, and the first derivative of the MACD Histogram.
 
     Args:
         macd: A list of floats representing the MACD values.
         signal_line: A list of floats representing the Signal Line values.
         macd_histogram: A list of floats representing the MACD Histogram values.
+        macd_histogram_derivative: A list of floats representing the first derivative of the MACD Histogram values.
         timestamps: An optional list of datetime objects representing the time points for each value.
     """
 
@@ -29,6 +32,8 @@ def plot_macd(
     fig = go.Figure()
 
     x_values = timestamps or list(range(len(macd)))
+    
+    # Plot MACD line
     fig.add_trace(
         go.Scatter(
             x=x_values,
@@ -39,6 +44,7 @@ def plot_macd(
         )
     )
 
+    # Plot Signal Line
     fig.add_trace(
         go.Scatter(
             x=x_values,
@@ -49,6 +55,7 @@ def plot_macd(
         )
     )
 
+    # Plot MACD Histogram as bars
     fig.add_trace(
         go.Bar(
             x=x_values,
@@ -58,9 +65,20 @@ def plot_macd(
         )
     )
 
+    # Plot the first derivative of the MACD Histogram as a line
+    fig.add_trace(
+        go.Scatter(
+            x=x_values,
+            y=macd_histogram_derivative,
+            mode="lines",
+            name="MACD Histogram Derivative",
+            line=dict(color="red", dash="dot"),
+        )
+    )
+
     # Update layout with white background
     fig.update_layout(
-        title="MACD, Signal Line, and MACD Histogram",
+        title="MACD, Signal Line, MACD Histogram, and MACD Histogram Derivative",
         xaxis_title="Time",
         yaxis_title="Value",
         legend_title="Legend",

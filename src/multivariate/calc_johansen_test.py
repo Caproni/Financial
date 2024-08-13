@@ -26,10 +26,10 @@ def calc_johansen_test(
         dict[str, str]: The results of the test.
     """
     log.function_call()
-    
+
     N1 = len(v1)
     N2 = len(v2)
-    
+
     if N1 > N2:
         log.warning("Arrays not of same length. Truncating first time-series.")
         v1 = v1[:N2]

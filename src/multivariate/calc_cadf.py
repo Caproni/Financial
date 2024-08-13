@@ -29,7 +29,7 @@ def calc_cadf(
 
     N1 = len(data_1)
     N2 = len(data_2)
-    
+
     if N1 > N2:
         log.warning("Arrays not of same length. Truncating first time-series.")
         data_1 = data_1[:N2]

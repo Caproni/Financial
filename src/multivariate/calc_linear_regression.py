@@ -40,14 +40,14 @@ def calc_linear_regression(
         x = sm.add_constant(x)
 
     model = sm.OLS(y, x).fit()
-    
+
     results = {
         "slope": float(model.params[0]),
         "r2_value": float(model.rsquared),
         "p_value": float(model.pvalues),
         "std_err": float(model.bse),
     }
-    
+
     if add_intercept:
         results["slope"] = float(model.params[1])
         results["intercept"] = float(model.params[0])

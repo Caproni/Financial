@@ -14,9 +14,9 @@ def calc_macd(
     short_window: int = 12,
     long_window: int = 26,
     signal_window: int = 9,
-) -> tuple[list[float], list[float], list[float]]:
+) -> tuple[list[float], list[float], list[float], list[float]]:
     """
-    Calculates the Moving Average Convergence Divergence (MACD) for the given data.
+    Calculates the Moving Average Convergence Divergence (MACD) and its first derivative (rate of change) for the given data.
 
     Args:
         data: A list of integers or floats representing the price data.
@@ -25,23 +25,27 @@ def calc_macd(
         signal_window: An integer specifying the signal line window (default is 9).
 
     Returns:
-        tuple[list[float], list[float], list[float]]: A tuple of lists containing the MACD, Signal Line, and MACD Histogram.
+        tuple[list[float], list[float], list[float], list[float]]: A tuple of lists containing the MACD, Signal Line, MACD Histogram, and the first derivative of the MACD Histogram.
     """
     log.function_call()
 
-    df = pd.DataFrame({"Price": data})
+    df = pd.DataFrame({"price": data})
 
-    df["EMA_short"] = df["Price"].ewm(span=short_window, adjust=False).mean()
-    df["EMA_long"] = df["Price"].ewm(span=long_window, adjust=False).mean()
+    df["ema_short"] = df["price"].ewm(span=short_window, adjust=False).mean()
+    df["ema_long"] = df["price"].ewm(span=long_window, adjust=False).mean()
 
-    df["MACD"] = df["EMA_short"] - df["EMA_long"]
-    df["Signal_Line"] = df["MACD"].ewm(span=signal_window, adjust=False).mean()
-    df["MACD_Histogram"] = df["MACD"] - df["Signal_Line"]
+    df["macd"] = df["ema_short"] - df["ema_long"]
+    df["signal_line"] = df["macd"].ewm(span=signal_window, adjust=False).mean()
 
-    df = df.drop(columns=["EMA_short", "EMA_long", "Price"])
+    df["macd_histogram"] = df["macd"] - df["signal_line"]
+
+    df["macd_histogram_derivative"] = df["macd_histogram"].diff()
+
+    df = df.drop(columns=["ema_short", "ema_long", "price"])
 
     return (
-        df["MACD"].to_list(),
-        df["Signal_Line"].to_list(),
-        df["MACD_Histogram"].to_list(),
+        df["macd"].to_list(),
+        df["signal_line"].to_list(),
+        df["macd_histogram"].to_list(),
+        df["macd_histogram_derivative"].to_list(),
     )

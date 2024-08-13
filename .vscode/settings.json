@@ -11,6 +11,7 @@
         "backtesting",
         "bollinger",
         "cadf",
+        "cagr",
         "coint",
         "dotenv",
         "iterrows",

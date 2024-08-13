@@ -6,7 +6,6 @@ Copyright 2024
 
 from typing import Any
 import pandas as pd
-import plotly.express as px
 import plotly.graph_objects as go
 from pymongo import MongoClient
 

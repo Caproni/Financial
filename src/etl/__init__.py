@@ -5,7 +5,6 @@ Copyright 2024
 """
 
 from .backup_collection_to_file import backup_collection_to_file
-from .delete_repeated_polygon_market_data import delete_repeated_polygon_market_data
 from .populate_database_exchanges import populate_database_exchanges
 from .populate_database_latest_market_data import populate_database_latest_market_data
 from .populate_database_market_data import populate_database_market_data
