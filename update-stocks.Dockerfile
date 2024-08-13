@@ -5,6 +5,7 @@ LABEL repository "Financial"
 LABEL entrypoint "update_stocks.py"
 
 ENV DEBIAN_FRONTEND=noninteractive
+ENV MESON_SKIP_TESTS=1
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \

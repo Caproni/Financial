@@ -37,6 +37,7 @@ if __name__ == "__main__":
     for duplicate_row in duplicate_rows:
         symbol = duplicate_row["symbol"]
         timestamp = duplicate_row["timestamp"]
+        log.info(f"Processing symbol: {symbol} at timestamp: {timestamp}")
 
         rows_to_delete = get_data(
             database_client=database_client,
