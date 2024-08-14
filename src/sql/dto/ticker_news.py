@@ -4,7 +4,7 @@ Author: Edmund Bennett
 Copyright 2024
 """
 
-from sqlalchemy import Column, Boolean, String, UUID
+from sqlalchemy import Column, TIMESTAMP, String, UUID
 from ..client import Base
 
 
@@ -104,16 +104,16 @@ class TickerNews(Base):
 
     __tablename__ = "ticker_news"
 
-    ticker = Column(String, nullable=False)
-    name = Column(String, primary_key=True, nullable=True)
-    market = Column(String, nullable=False)
-    locale = Column(String, nullable=False)
-    primary_exchange = Column(String, nullable=True)
-    type = Column(String, nullable=True)
-    active = Column(Boolean, nullable=False)
-    currency_name = Column(String, nullable=True)
-    cik = Column(String, nullable=True)
-    composite_figi = Column(String, nullable=True)
-    share_class_figi = Column(String, nullable=True)
-    last_updated_utc = Column(String, nullable=True)
-    ticker_news_id = Column(UUID, nullable=False)
+    ticker_news_id = Column(UUID, primary_key=True, nullable=False)
+    amp_url = Column(String, nullable=False)
+    article_url = Column(String, nullable=False)
+    author = Column(String, nullable=False)
+    description = Column(String, nullable=False)
+    polygon_id = Column(String, nullable=True)  # this is the "id" field in Polygon
+    insight_id = Column(UUID, nullable=False)
+    image_url = Column(String, nullable=True)
+    keyword_id = Column(String, nullable=True)
+    published_utc = Column(TIMESTAMP, nullable=True)
+    publisher_id = Column(UUID, nullable=False)
+    tickers = Column(String, nullable=True)   # bson list of tickers
+    title = Column(String, nullable=False)

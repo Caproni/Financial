@@ -9,4 +9,4 @@ from .list_tickers import list_tickers
 from .list_ticker_news import list_ticker_news
 from .get_exchanges import get_exchanges
 from .get_related_companies import get_related_companies
-from .get_fundamental_data import get_fundamental_data
+from .get_stock_financials import get_stock_financials

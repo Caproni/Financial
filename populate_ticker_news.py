@@ -16,11 +16,9 @@ from src.utils import log
 
 if __name__ == "__main__":
 
-    log.info("Starting database population.")
+    log.info("Starting database population for ticker news.")
 
     database_client = create_sql_client()
-
-    # news data
 
     tickers = get_data(
         database_client,
@@ -40,7 +38,7 @@ if __name__ == "__main__":
             )
         )
 
-    log.info("Deleting repeated data.")
+    log.info("Deleting repeated ticker news data.")
 
     delete_repeated_data(
         mongo_client=database_client,
@@ -48,4 +46,4 @@ if __name__ == "__main__":
         field="polygon_id",
     )
 
-    log.info("Completed database population.")
+    log.info("Completed database population for ticker news.")

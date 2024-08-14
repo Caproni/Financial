@@ -15,6 +15,7 @@
         "coint",
         "dotenv",
         "drawdowns",
+        "financials",
         "iterrows",
         "johansen",
         "linregress",
