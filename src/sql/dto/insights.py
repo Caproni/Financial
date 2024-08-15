@@ -16,4 +16,3 @@ class Insights(Base):
     sentiment = Column(String, nullable=False)
     sentiment_reasoning = Column(String, nullable=False)
     ticker = Column(String, nullable=False, primary_key=True)
-

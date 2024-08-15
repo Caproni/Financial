@@ -115,5 +115,5 @@ class TickerNews(Base):
     keyword_id = Column(String, nullable=True)
     published_utc = Column(TIMESTAMP, nullable=True)
     publisher_id = Column(UUID, nullable=False)
-    tickers = Column(String, nullable=True)   # bson list of tickers
+    tickers = Column(String, nullable=True)  # bson list of tickers
     title = Column(String, nullable=False)

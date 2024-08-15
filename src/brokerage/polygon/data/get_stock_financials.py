@@ -104,7 +104,7 @@ def get_stock_financials(
                             "value": v.value,
                         }
                     )
-        
+
         financials.append(
             {
                 "ticker": ticker,

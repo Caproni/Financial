@@ -11,17 +11,26 @@ from .client import (
 )
 from .dto import (
     Exchanges,
-    RelatedCompanies,
-    Tickers,
-    TickerNews,
+    FinancialReportingItems,
+    Financials,
+    Insights,
+    MaterializedViews,
     PolygonMarketDataDay,
     PolygonMarketDataHour,
+    Publishers,
+    RelatedCompanies,
+    TickerNewsKeywords,
+    TickerNews,
+    Tickers,
+    Transactions,
 )
 from .func import (
     get_data,
     delete_data,
     insert_data,
-    unpack_simple_table,
+    update_data,
     unpack_related_companies,
+    unpack_simple_table,
+    unpack_stock_financials,
     unpack_ticker_news,
 )

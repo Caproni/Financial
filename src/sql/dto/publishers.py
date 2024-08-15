@@ -17,4 +17,3 @@ class Publishers(Base):
     homepage_url = Column(String, nullable=True)
     logo_url = Column(String, nullable=True)
     favicon_url = Column(String, nullable=True)
-
