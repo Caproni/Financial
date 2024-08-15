@@ -17,7 +17,7 @@ if __name__ == "__main__":
     log.info("Starting refresh of database materialized views.")
 
     database_client = create_sql_client()
-    
+
     materialized_views = [
         "liquid_tickers",
         "polygon_market_data_day_summary",
@@ -25,19 +25,23 @@ if __name__ == "__main__":
     ]
 
     with database_client.engine.connect() as connection:
-        
+
         for materialized_view in materialized_views:
             log.info(f"Refreshing: {materialized_view}")
             connection.execute(text(f"REFRESH MATERIALIZED VIEW {materialized_view}"))
-            update_data(
+            success = update_data(
                 database_client,
                 rows_to_update=[
                     MaterializedViews(
                         materialized_view_name=materialized_view,
                         last_refreshed=datetime.now(),
                     )
-                ]
+                ],
             )
-            
+
+            if not success:
+                log.warning(
+                    "Could not update materialized_views table with latest refresh timestamp."
+                )
 
     log.info("Completed refresh of database materialized views.")

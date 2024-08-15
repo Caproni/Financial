@@ -11,7 +11,8 @@ from src.utils import log
 
 
 def delete_data(
-    sql_client: DatabaseClient, rows_to_delete: list[Any]  # A list of ORM instances
+    sql_client: DatabaseClient,
+    rows_to_delete: list[Any],  # A list of ORM instances
 ) -> bool:
     """
     Deletes rows from the database.
