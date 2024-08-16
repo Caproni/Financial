@@ -16,6 +16,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     cmake \
     gfortran \
     pkg-config \
+    ninja-build \
     libopenblas-dev \
     liblapack-dev \
     libatlas-base-dev \
