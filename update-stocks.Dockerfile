@@ -36,4 +36,4 @@ COPY update_stocks.py /code/
 
 RUN chmod +x /code/update_stocks.py
 
-CMD ["python", "update_stocks.py"]
+ENTRYPOINT ["python", "update_stocks.py"]

@@ -36,4 +36,4 @@ COPY test_cronjob.py /code/
 
 RUN chmod +x /code/test_cronjob.py
 
-CMD ["python", "test_cronjob.py"]
+ENTRYPOINT ["python", "test_cronjob.py"]
