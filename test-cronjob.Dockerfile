@@ -2,7 +2,7 @@ FROM --platform=linux/arm64 python:latest
 
 LABEL maintainer "Edmund Bennett"
 LABEL repository "Financial"
-LABEL entrypoint "update_stocks.py"
+LABEL entrypoint "test_cronjob.py"
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV PYTHONUNBUFFERED=1
@@ -32,8 +32,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY src /code/src
 
-COPY update_stocks.py /code/
+COPY test_cronjob.py /code/
 
-RUN chmod +x /code/update_stocks.py
+RUN chmod +x /code/test_cronjob.py
 
-CMD ["python", "update_stocks.py"]
+CMD ["python", "test_cronjob.py"]
