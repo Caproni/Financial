@@ -1,0 +1,2 @@
+wsl buildah bud --arch arm --os linux -f ../dockerfiles/Dockerfile.refresh-materialized-views -t docker.io/caproni60/financial:refresh-materialized-views-latest ..
+wsl podman push docker.io/caproni60/financial:refresh-materialized-views-latest

@@ -1,0 +1,11 @@
+FROM --platform=linux/arm64 docker.io/caproni60/financial:base-latest
+
+LABEL entrypoint "refresh_materialized_views.py"
+
+COPY src /code/src
+
+COPY refresh_materialized_views.py /code/
+
+RUN chmod +x /code/refresh_materialized_views.py
+
+ENTRYPOINT ["python", "refresh_materialized_views.py"]
