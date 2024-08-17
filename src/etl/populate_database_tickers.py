@@ -40,4 +40,5 @@ def populate_database_tickers() -> bool:
     return insert_data(
         database_client,
         documents=documents,
+        allow_partial_inserts=True,
     )

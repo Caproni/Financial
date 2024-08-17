@@ -36,4 +36,5 @@ def populate_database_exchanges() -> bool:
     return insert_data(
         database_client,
         documents=documents,
+        allow_partial_inserts=True,
     )

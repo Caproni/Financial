@@ -11,7 +11,7 @@ from src.mongo import get_data, insert_data
 from src.utils import log
 
 
-def populate_database_statistical_data(
+def populate_database_statistical_data(  # TODO: implement me or delete
     client: MongoClient,
     database: str,
     input_collection_name: str,
