@@ -1,0 +1,2 @@
+wsl buildah bud --arch arm --os linux -f ../dockerfiles/Dockerfile.populate-reference-data -t docker.io/caproni60/financial:populate-reference-data-latest ..
+wsl podman push docker.io/caproni60/financial:populate-reference-data-latest
