@@ -35,7 +35,7 @@ def populate_database_related_companies(
 
     if tickers is None:
         tickers = get_data(
-            client=database_client,
+            database_client=database_client,
             models=[Tickers],
         )
         tickers = [ticker["ticker"] for ticker in tickers]
