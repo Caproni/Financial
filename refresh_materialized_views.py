@@ -8,7 +8,7 @@ from datetime import datetime
 from sqlalchemy import text
 
 from src.sql.client import create_sql_client
-from src.sql import MaterializedViews, update_data
+from src.sql import MaterializedViews, insert_data
 from src.utils import log
 
 
@@ -29,14 +29,15 @@ if __name__ == "__main__":
         for materialized_view in materialized_views:
             log.info(f"Refreshing: {materialized_view}")
             connection.execute(text(f"REFRESH MATERIALIZED VIEW {materialized_view}"))
-            success = update_data(
+            success = insert_data(
                 database_client,
-                rows_to_update=[
+                documents=[
                     MaterializedViews(
                         materialized_view_name=materialized_view,
                         last_refreshed=datetime.now(),
                     )
                 ],
+                upsert=True,
             )
 
             if not success:
