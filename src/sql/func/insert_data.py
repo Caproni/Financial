@@ -22,7 +22,7 @@ def insert_data(
     Bulk inserts data into the database.
 
     Args:
-        documents (list): A list of DTOs to be inserted.
+        documents (list): A list of Data Transfer Objects (DTOs) to be inserted.
         allow_partial_inserts (bool): If True, allows for partial insertion of documents that do not violate constraints.
         upsert (bool): If True, performs an upsert operation (insert or update).
     """
@@ -42,7 +42,7 @@ def insert_data(
                     db.commit()
                 except IntegrityError as e:
                     db.rollback()  # Rollback only this document's transaction
-                    log.error(f"Error processing document {document}. Error: {e}")
+                    log.warning(f"Error processing document {document}. Error: {e}")
                     success = False
             return success
         else:
