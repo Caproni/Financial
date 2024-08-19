@@ -1,0 +1,9 @@
+FROM --platform=linux/arm64 docker.io/caproni60/financial:base-latest
+
+WORKDIR /code
+
+COPY requirements.txt /code/requirements.txt
+
+RUN pip install --no-cache-dir -r requirements.txt
+
+CMD ["python"]
