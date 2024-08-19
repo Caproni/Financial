@@ -10,7 +10,9 @@ from .client import (
     create_sql_client,
 )
 from .dto import (
+    EntryCriteria,
     Exchanges,
+    ExitCriteria,
     FinancialReportingItems,
     Financials,
     Insights,
@@ -19,9 +21,13 @@ from .dto import (
     PolygonMarketDataHour,
     Publishers,
     RelatedCompanies,
+    RiskManagementRules,
+    StopLossCriteria,
+    TakeProfitCriteria,
     TickerNewsKeywords,
     TickerNews,
     Tickers,
+    TradingStrategies,
     Transactions,
 )
 from .func import (

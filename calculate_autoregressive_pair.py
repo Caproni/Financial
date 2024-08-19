@@ -6,6 +6,7 @@ Copyright 2024
 
 from datetime import datetime
 from sqlalchemy import and_
+import sentry_sdk
 
 from src.sql import (
     create_sql_client,
@@ -19,6 +20,11 @@ from src.multivariate.plots import plot_time_series, plot_vertical_bars
 from src.univariate.plots import plot_bollinger_bands, plot_macd
 from src.utils import log, align_time_series
 
+sentry_sdk.init(
+    dsn="https://8cd12a857607d331985d59a77ea0828e@o4507797009334272.ingest.de.sentry.io/4507797017133136",
+    traces_sample_rate=1.0,
+    profiles_sample_rate=1.0,
+)
 
 if __name__ == "__main__":
 
