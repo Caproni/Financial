@@ -5,7 +5,7 @@ Copyright 2024
 """
 
 import pandas as pd
-import src.ml.predict_daily_trend as xgb
+import xgboost as xgb
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
 
@@ -17,7 +17,7 @@ def predict_daily_trend(
 ):
     log.function_call()
 
-    data.set_index("datetime", inplace=True)
+    data.set_index("timestamp", inplace=True)
     data = data.sort_index()
 
     data["date"] = data.index.date
@@ -33,16 +33,12 @@ def predict_daily_trend(
 
     data["hour"] = data.index.hour
     data["day_of_week"] = data.index.dayofweek
-    data["moving_avg_5"] = data["close"].rolling(window=5).mean()
-    data["moving_avg_10"] = data["close"].rolling(window=10).mean()
 
-    data.dropna(inplace=True)
+    # data.dropna(inplace=True)
 
     features = [
         "hour",
         "day_of_week",
-        "moving_avg_5",
-        "moving_avg_10",
         "open",
         "high",
         "low",

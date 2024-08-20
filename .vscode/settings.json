@@ -14,6 +14,7 @@
         "cadf",
         "cagr",
         "coint",
+        "dayofweek",
         "dotenv",
         "drawdowns",
         "dropna",

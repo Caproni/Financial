@@ -4,4 +4,4 @@ Author: Edmund Bennett
 Copyright 2024
 """
 
-from .trainers import predict_daily_trend_trainer
+from .predict_daily_trend_trainer import predict_daily_trend_trainer
