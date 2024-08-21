@@ -8,7 +8,7 @@ from typing import Any
 from pickle import load
 from gzip import open as open_zip
 
-from src.utils import log
+from src.utils.logger import logger as log
 
 
 def load_json_from_file(

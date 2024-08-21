@@ -7,10 +7,15 @@ Copyright 2024
 from typing import Any
 from sqlalchemy.sql.elements import BooleanClauseList
 
+from src.cache import generate_key, PersistentCache
 from src.sql import DatabaseClient
 from src.utils import log
 
 
+cache = PersistentCache(cache_dir="staging")
+
+
+@cache.cache_function(generate_key)
 def get_data(
     database_client: DatabaseClient,
     models: list[Any] | None,
