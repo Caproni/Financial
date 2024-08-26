@@ -6,14 +6,30 @@ Copyright 2024
 
 import pandas as pd
 import xgboost as xgb
-from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
+from datetime import timedelta
+from sklearn.metrics import (
+    accuracy_score,
+    balanced_accuracy_score,
+    precision_score,
+    confusion_matrix,
+    classification_report,
+)
+from sklearn.model_selection import train_test_split
+import numpy as np
+from datetime import datetime
 
 from src.univariate.analysis import calc_macd
+from src.ml.analysis import run_pca
 from src.utils import log
 
 
+np.random.seed(1729)
+
+
 def predict_binary_daily_trend(
-    data: pd.DataFrame,
+    daily_data: pd.DataFrame,
+    serving_set_size: int,
+    threshold_percentage: float = 0.0,
 ):
     """
     Predicts the daily trend of stock prices based on historical data.
@@ -24,161 +40,214 @@ def predict_binary_daily_trend(
         data (pd.DataFrame): A DataFrame containing stock price data with columns including 'timestamp', 'symbol', 'close', 'open', 'high', 'low', and 'volume'.
 
     Returns:
-        tuple: A tuple containing:
-            - final_model: The last trained machine learning model.
-            - performance_info: A list of dictionaries containing performance metrics for each prediction.
-            - predictions_df: A DataFrame with prediction results including actual and predicted values, accuracy, confusion matrix, and classification report.
+        performance_info: A list of dictionaries containing performance metrics for each prediction.
 
     Examples:
         >>> predictions = predict_daily_trend(data)
     """
     log.function_call()
 
-    data.set_index("timestamp", inplace=True)
-    data = data.sort_index()
+    current_serving_set = 0
 
-    data["date"] = data.index.date
+    daily_data = daily_data.set_index("timestamp")
+    daily_data = daily_data.sort_index()
 
-    # Initialize a DataFrame to store prediction results and a list for performance
-    predictions_df = pd.DataFrame(
-        columns=[
-            "symbol",
-            "date",
-            "actual",
-            "predicted",
-            "accuracy",
-            "confusion_matrix",
-            "classification_report",
-        ]
+    daily_data["date"] = daily_data.index.date
+    daily_data["timestamp"] = daily_data.index.date
+    daily_data["daily_hour"] = daily_data.index.hour
+    daily_data["daily_day_of_week"] = daily_data.index.dayofweek
+    daily_data = daily_data.drop(labels=["data_id", "otc", "high", "low"], axis=1)
+    daily_data = daily_data.rename(
+        columns={
+            "open": "daily_open",
+            "close": "daily_close",
+            "volume": "daily_volume",
+            "transactions": "daily_transactions",
+            "vwap": "daily_vwap",
+        }
     )
+
     performance_info = []
 
-    final_model = None
+    features = [
+        "daily_open",
+        "daily_close",
+        "daily_macd_histogram",
+        "daily_macd_first_derivative",
+    ]
 
-    for symbol, symbol_data in data.groupby("symbol"):
-        symbol_data = symbol_data.copy()
+    for symbol, daily_symbol_data in daily_data.groupby("symbol"):
+        if daily_symbol_data.empty:
+            log.info(f"No daily data available for the selected symbol: {symbol}")
+            continue
 
-        first_price_daily = symbol_data.groupby("date")["close"].first()
-        symbol_data["first_price"] = symbol_data["date"].map(first_price_daily)
-        symbol_data["price_rise"] = (
-            symbol_data["close"] > symbol_data["first_price"]
+        daily_symbol_data["price_rise"] = (
+            daily_symbol_data["daily_close"]
+            > daily_symbol_data["daily_open"] * (1 + (threshold_percentage / 100))
         ).astype(int)
-        symbol_data["target"] = symbol_data["price_rise"].shift(-1)
 
-        symbol_data.dropna(subset=["target"], inplace=True)
+        daily_symbol_data["target"] = daily_symbol_data["price_rise"].shift(-1)
 
-        symbol_data["hour"] = symbol_data.index.hour
-        symbol_data["day_of_week"] = symbol_data.index.dayofweek
-        _, _, macd_histogram, macd_first_derivative = calc_macd(
-            data=symbol_data["close"].to_list(),
+        daily_symbol_data = daily_symbol_data.dropna(subset=["target"])
+        daily_symbol_data["target"] = daily_symbol_data["target"].astype(int)
+
+        _, _, daily_macd_histogram, daily_macd_first_derivative = calc_macd(
+            data=daily_symbol_data["daily_close"].to_list(),
         )
-        symbol_data["macd_histogram"] = macd_histogram
-        symbol_data["macd_first_derivative"] = macd_first_derivative
+        daily_symbol_data["daily_macd_histogram"] = daily_macd_histogram
+        daily_symbol_data["daily_macd_first_derivative"] = daily_macd_first_derivative
 
-        features = [
-            "hour",
-            "day_of_week",
-            "open",
-            "high",
-            "low",
-            "volume",
-            "macd_histogram",
-            "macd_first_derivative",
-            "first_price",  # Include the first hourly close price as a feature
-        ]
+        serving_set: None | pd.DataFrame = None
+        prediction_inputs: None | pd.DataFrame = None
+        for date, _ in daily_symbol_data.iterrows():
 
-        for date, daily_data in symbol_data.groupby("date"):
-            daily_data = daily_data.copy()
+            if date.weekday() in [5, 6]:
+                log.info("Date is on the weekend.")
+                continue
+
+            days_prior = 1
+            if date.weekday() == 0:  # Monday
+                days_prior = 3  # previous Friday
 
             # Use data before the current date for training
-            training_data = symbol_data[symbol_data["date"] < date]
-            if training_data.empty:
+            daily_training_data = daily_symbol_data[
+                daily_symbol_data["date"] == date.date() - timedelta(days=days_prior)
+            ]
+
+            daily_training_data = daily_training_data.dropna()
+
+            if daily_training_data.empty:
                 log.info(
-                    f"No training data available for the selected date: {date} and symbol: {symbol}"
+                    f"No daily data available for the selected date: {date} and symbol: {symbol}"
                 )
                 continue
 
-            # Extract the first hourly close price for the current day
-            first_hourly_closes = daily_data[daily_data["hour"] == 9]["close"]
+            # Check that the markets opened that morning
+            daily_open = daily_symbol_data[
+                daily_symbol_data["date"] == date.date()
+            ].copy()
+            daily_open = daily_open.dropna()
 
-            if first_hourly_closes.empty:
-                log.info(
-                    f"No first close date for selected date: {date} and symbol: {symbol}"
-                )
+            if daily_open.empty:
+                log.warning("No available open data for this day.")
                 continue
 
-            first_hourly_close = first_hourly_closes.iloc[0]
-
-            # Create a single-row DataFrame for prediction
-            prediction_data = pd.DataFrame(
-                {
-                    "hour": [9],  # Using the hour of the first hourly close
-                    "day_of_week": [daily_data["day_of_week"].iloc[0]],
-                    "open": [daily_data["open"].iloc[0]],
-                    "high": [daily_data["high"].iloc[0]],
-                    "low": [daily_data["low"].iloc[0]],
-                    "volume": [daily_data["volume"].iloc[0]],
-                    "macd_histogram": [
-                        macd_histogram[0]
-                    ],  # Using the MACD histogram of the first hour
-                    "macd_first_derivative": [
-                        macd_first_derivative[0]
-                    ],  # Using the MACD derivative of the first hour
-                    "first_price": [
-                        first_hourly_close
-                    ],  # Use the first hourly close as a feature
+            daily_open = daily_open.rename(
+                columns={
+                    "daily_open": "target_date_daily_open",
+                    "daily_close": "target_date_daily_close",
                 }
             )
 
-            # Train the model with the historical data
-            X_train = training_data[features]
-            y_train = training_data["target"]
+            prediction_input = daily_training_data.copy()
+            prediction_input["target_date_daily_open"] = daily_open[
+                "target_date_daily_open"
+            ].to_list()
+            prediction_input["target_date_daily_close"] = daily_open[
+                "target_date_daily_close"
+            ].to_list()
 
-            model = xgb.XGBClassifier(
-                objective="binary:logistic", eval_metric="logloss"
+            if prediction_inputs is None:
+                prediction_inputs = prediction_input
+            else:
+                prediction_inputs = pd.concat(
+                    [prediction_inputs, prediction_input],
+                    axis=0,
+                )
+
+        if prediction_inputs is None:
+            log.warning(
+                f"Insufficient data available for model training for symbol: {symbol}"
             )
-            model.fit(X_train, y_train)
+            continue
 
-            # Save the final model (this will be the last model trained)
-            final_model = model
-
-            # Predict the end-of-day trend using the first hourly close price
-            y_pred = model.predict(prediction_data)
-            actual = daily_data["target"].iloc[
-                -1
-            ]  # The actual value for the end of the day
-            accuracy = accuracy_score([actual], y_pred)
-            conf_matrix = confusion_matrix([actual], y_pred)
-            class_report = classification_report([actual], y_pred, output_dict=False)
-
-            # Record performance information
-            performance_info.append(
-                {
-                    "symbol": symbol,
-                    "date": date,
-                    "accuracy": accuracy,
-                    "confusion_matrix": conf_matrix,
-                    "classification_report": class_report,
-                }
+        prediction_inputs = prediction_inputs.dropna(subset=["target"])
+        
+        if len(prediction_inputs) < 20:
+            log.warning(
+                f"Insufficient data available for model training for symbol: {symbol}"
             )
+            continue
 
-            # Create a single row of results for this day's prediction
-            daily_results = pd.DataFrame(
-                {
-                    "symbol": [symbol],
-                    "date": [date],
-                    "actual": [actual],
-                    "predicted": y_pred,
-                    "accuracy": [accuracy],
-                    "confusion_matrix": [conf_matrix],
-                    "classification_report": [class_report],
-                }
-            )
+        serving_set = prediction_inputs.sample(n=min(len(prediction_inputs) // 10, serving_set_size))
 
-            # Append to the predictions DataFrame
-            predictions_df = pd.concat(
-                [predictions_df, daily_results], ignore_index=True
-            )
+        X = prediction_inputs[features]
+        y = prediction_inputs["target"]
 
-    # Return the final model, performance information, and predictions DataFrame
-    return final_model, performance_info, predictions_df
+        X_pca, pca = run_pca(X, n_components=0.95)
+
+        X_train, X_test, y_train, y_test = train_test_split(
+            X,
+            y,
+            test_size=0.2,
+            random_state=1729,
+        )
+
+        model = xgb.XGBClassifier(
+            objective="binary:logistic",
+            eval_metric="logloss",
+        )
+        model.fit(X_train, y_train)
+
+        y_pred = model.predict(X_test)
+        accuracy = accuracy_score(y_test, y_pred)
+        balanced_accuracy = balanced_accuracy_score(y_test, y_pred)
+        precision = precision_score(y_test, y_pred)
+        conf_matrix = confusion_matrix(y_test, y_pred)
+        class_report = classification_report(y_test, y_pred, output_dict=False)
+
+        X_serve, y_serve, y_serve_pred = None, None, None
+        if serving_set is not None:
+            X_serve = serving_set[features]
+            y_serve = serving_set["target"]
+            y_serve_pred = model.predict(X_serve)
+
+        log.info("Training model on all data.")
+
+        full_model = xgb.XGBClassifier(
+            objective="binary:logistic",
+            eval_metric="logloss",
+        )
+        full_model.fit(X, y)
+
+        log.info("Recording performance information.")
+
+        performance_info.append(
+            {
+                "timestamp": datetime.now(),
+                "symbols": [symbol],
+                "accuracy": float(accuracy),
+                "balanced_accuracy": float(balanced_accuracy),
+                "precision": float(precision),
+                "confusion_matrix": conf_matrix,
+                "features": features,
+                "classification_report": class_report,
+                "validated_model": model,
+                "model": full_model,
+                "training_set_rows": len(y_train),
+                "training_data": X_train,
+                "training_targets": y_train,
+                "test_set_rows": len(y_test),
+                "test_data": X_test,
+                "test_targets": y_test,
+                "serving_set_rows": len(serving_set),
+                "serving_data": X_serve,
+                "serving_targets": y_serve,
+                "y_serve": y_serve.tolist() if y_serve is not None else None,
+                "y_serve_pred": (
+                    y_serve_pred.tolist() if y_serve_pred is not None else None
+                ),
+                "serving_set_indicated_entry_prices": (
+                    serving_set["target_date_daily_open"].tolist()
+                    if serving_set is not None
+                    else None
+                ),
+                "serving_set_indicated_exit_prices": (
+                    serving_set["target_date_daily_close"].tolist()
+                    if serving_set is not None
+                    else None
+                ),
+            }
+        )
+
+    return performance_info

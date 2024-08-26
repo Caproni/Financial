@@ -5,6 +5,7 @@ Copyright 2024
 """
 
 import pickle
+from gzip import open as open_zip
 
 from src.utils.logger import logger as log
 
@@ -26,5 +27,10 @@ def load_object_from_pickle(file_path: str) -> object:
     """
     log.function_call()
 
-    with open(file_path, "rb") as f:
-        return pickle.load(f)
+    if file_path.endswith(".gz"):
+        log.info("Attempting file decompression.")
+        with open_zip(file_path, "rb") as f:
+            return pickle.load(f)
+    else:
+        with open(file_path, "rb") as f:
+            return pickle.load(f)

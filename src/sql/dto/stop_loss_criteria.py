@@ -12,7 +12,7 @@ class StopLossCriteria(Base):
 
     __tablename__ = "stop_loss_criteria"
 
-    stop_loss_criterion_id = Column(UUID, nullable=True, primary_key=True)
+    stop_loss_criterion_id = Column(UUID, nullable=False, primary_key=True)
     criterion = Column(String, nullable=False)
     criterion_type = Column(String, nullable=False)
     last_modified_at = Column(TIMESTAMP, nullable=False)

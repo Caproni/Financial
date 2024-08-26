@@ -12,7 +12,7 @@ class RiskManagementRules(Base):
 
     __tablename__ = "risk_management_rules"
 
-    risk_management_rule_id = Column(UUID, nullable=True, primary_key=True)
+    risk_management_rule_id = Column(UUID, nullable=False, primary_key=True)
     rule = Column(String, nullable=False)
     rule_type = Column(String, nullable=False)
     last_modified_at = Column(TIMESTAMP, nullable=False)

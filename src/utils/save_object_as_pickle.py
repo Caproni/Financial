@@ -9,7 +9,11 @@ import pickle
 from src.utils.logger import logger as log
 
 
-def save_object_as_pickle(obj: object, file_path: str):
+def save_object_as_pickle(
+    obj: object,
+    file_path: str,
+    compress: bool = True,
+):
     """
     Save a Python object.
 
@@ -23,6 +27,9 @@ def save_object_as_pickle(obj: object, file_path: str):
     log.function_call()
 
     with open(file_path, "wb") as f:
-        pickle.dump(obj, f)
+        if compress:
+            pickle.dump(obj, f, protocol=pickle.HIGHEST_PROTOCOL)
+        else:
+            pickle.dump(obj, f)
 
     log.info(f"Object saved to {file_path}")

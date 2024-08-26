@@ -9,7 +9,7 @@ import sentry_sdk
 
 from src.etl import backup_collection_to_file
 from src.mongo import create_mongo_client
-from src.utils import log, load_json_from_file
+from src.utils import log
 
 sentry_sdk.init(
     dsn="https://8cd12a857607d331985d59a77ea0828e@o4507797009334272.ingest.de.sentry.io/4507797017133136",

@@ -12,7 +12,7 @@ class TakeProfitCriteria(Base):
 
     __tablename__ = "take_profit_criteria"
 
-    take_profit_criterion_id = Column(UUID, nullable=True, primary_key=True)
+    take_profit_criterion_id = Column(UUID, nullable=False, primary_key=True)
     criterion = Column(String, nullable=False)
     criterion_type = Column(String, nullable=False)
     last_modified_at = Column(TIMESTAMP, nullable=False)

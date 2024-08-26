@@ -12,7 +12,7 @@ class EntryCriteria(Base):
 
     __tablename__ = "entry_criteria"
 
-    entry_criterion_id = Column(UUID, nullable=True, primary_key=True)
+    entry_criterion_id = Column(UUID, nullable=False, primary_key=True)
     criterion = Column(String, nullable=False)
     criterion_type = Column(String, nullable=False)
     last_modified_at = Column(TIMESTAMP, nullable=False)
