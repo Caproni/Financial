@@ -61,7 +61,7 @@ if __name__ == "__main__":
     alpaca_assets = [a for a in alpaca_assets if a.tradable]
     shortable_stocks = [e.symbol for e in alpaca_assets if e.shortable]
 
-    market_open_time = alpaca_clock.next_open - timedelta(days=1)
+    market_open_time = alpaca_clock.next_open
 
     if (
         not alpaca_clock.is_open
