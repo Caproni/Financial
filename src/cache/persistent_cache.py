@@ -54,11 +54,21 @@ class PersistentCache:
 
         def decorator(func: Callable[..., Any]):
             def wrapper(*args, **kwargs):
+                # Check for the 'use_cache' keyword argument
+                use_cache = kwargs.pop("use_cache", True)
+
+                # Generate the cache key
                 key = key_func(*args, **kwargs)
-                if key in self.cache:
+
+                if use_cache and key in self.cache:
                     return self.cache[key]
+
+                # Call the actual function if caching is bypassed or cache miss
                 result = func(*args, **kwargs)
-                self.set(key, result)
+
+                if use_cache:
+                    self.set(key, result)
+
                 return result
 
             return wrapper
@@ -68,7 +78,9 @@ class PersistentCache:
 
 def generate_key(*args, **kwargs) -> str:
     models = " ".join([e.__tablename__ for e in kwargs["models"]])
-    where_clause = str(
-        kwargs["where_clause"].compile(compile_kwargs={"literal_binds": True})
-    ) if "where_clause" in kwargs else "all"
+    where_clause = (
+        str(kwargs["where_clause"].compile(compile_kwargs={"literal_binds": True}))
+        if "where_clause" in kwargs
+        else "all"
+    )
     return f"{models} {where_clause}"

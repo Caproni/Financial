@@ -7,7 +7,7 @@ Copyright 2024
 from src.utils import log
 
 
-def calculate_cagr(
+def calc_cagr(
     initial_value: float,
     final_value: float,
     periods: int,

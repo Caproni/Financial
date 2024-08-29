@@ -25,6 +25,7 @@ def get_data(
     group_by: list = None,
     having_clause: BooleanClauseList | None = None,
     as_dict: bool = True,
+    use_cache: bool = False,
 ):
     """
     Retrieves data from the database based on specified models, joins, and conditions.
@@ -37,6 +38,7 @@ def get_data(
         entities: An optional list of entities to query.
         group_by: An optional list of columns to group results by.
         as_dict: A boolean indicating whether to return results as dictionaries (default is True).
+        use_cache: A boolean indicating whether to use caching for this query (default is False).
 
     Returns:
         A list of dictionaries or model objects based on the query results.

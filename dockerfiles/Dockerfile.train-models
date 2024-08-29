@@ -1,0 +1,11 @@
+FROM --platform=linux/arm64 docker.io/caproni60/financial:base-latest
+
+LABEL entrypoint "train_models.py"
+
+COPY src /code/src
+
+COPY train_models.py /code/
+
+RUN chmod +x /code/train_models.py
+
+ENTRYPOINT ["python", "train_models.py"]

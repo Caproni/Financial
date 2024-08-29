@@ -5,7 +5,7 @@ Copyright 2024
 """
 
 import pickle
-from gzip import open as open_zip
+from gzip import open as open_zip, BadGzipFile
 
 from src.utils.logger import logger as log
 
@@ -29,8 +29,16 @@ def load_object_from_pickle(file_path: str) -> object:
 
     if file_path.endswith(".gz"):
         log.info("Attempting file decompression.")
-        with open_zip(file_path, "rb") as f:
-            return pickle.load(f)
-    else:
-        with open(file_path, "rb") as f:
-            return pickle.load(f)
+        try:
+            with open_zip(file_path, "rb") as f:
+                return pickle.load(f)
+        except BadGzipFile as _:
+            log.info(
+                "Could not decompress file. Not compressed. Trying to load file without decompression."
+            )
+        except Exception as e:
+            log.error(f"Could not decompress file. Error: {e}")
+            raise e
+
+    with open(file_path, "rb") as f:
+        return pickle.load(f)

@@ -54,7 +54,10 @@ def get_timestamp_information(
             "is_open": None,
             "first_hour": None,
             "last_hour": None,
+            "previous_trading_date": None,
         }
+
+        index = None
         if calendar_dates := [e for e in calendar if e.date == timestamp.date()]:
             dt = calendar_dates[0]
             payload["date"] = dt.date
@@ -67,6 +70,12 @@ def get_timestamp_information(
             payload["last_hour"] = (
                 payload["is_open"] and timestamp + timedelta(hours=1) >= dt.close
             )
+            index = next(
+                (i for i, e in enumerate(calendar) if e.date == timestamp.date()), None
+            )
+
+        if index is not None:
+            payload["previous_trading_date"] = calendar[index - 1].date
 
         information.append(payload)
 

@@ -21,16 +21,16 @@ async def get_market_data_async(
     multiplier: int,
     start_datetime: datetime,
     to: datetime,
+    subtract_day: bool = True,
 ):
+    offset = timedelta(days=1) if subtract_day else timedelta(days=0)
     return await to_thread(
         polygon_client.get_aggs,
         ticker=ticker,
         multiplier=multiplier,
         timespan=timespan,
         from_=start_datetime,
-        to=min(
-            start_datetime + delta - timedelta(days=1), to
-        ),  # subtract a day to prevent double-counting,
+        to=min(start_datetime + delta - offset, to),
         adjusted=True,
         raw=False,
         limit=50_000,
@@ -44,6 +44,7 @@ async def get_market_data(
     to: datetime,
     timespan: str,
     multiplier: int = 1,
+    subtract_day: bool = True,
 ) -> list[dict[str, Any]]:
     """Gets market data from Polygon.io.
 
@@ -54,6 +55,7 @@ async def get_market_data(
         to (datetime): End date for data.
         timespan (str): Frequency of data.
         multiplier (int, optional): Number of "timespans". Defaults to 1.
+        subtract_day (bool): Whether to subtract a day to prevent the same data being retrieved twice.
 
     Returns:
         list[dict[str, Any]]: A list of dictionaries representing bars.
@@ -86,6 +88,7 @@ async def get_market_data(
                     multiplier=multiplier,
                     start_datetime=start_datetime,
                     to=to,
+                    subtract_day=subtract_day,
                 )
             )
 

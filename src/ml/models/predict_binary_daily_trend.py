@@ -47,8 +47,6 @@ def predict_binary_daily_trend(
     """
     log.function_call()
 
-    current_serving_set = 0
-
     daily_data = daily_data.set_index("timestamp")
     daily_data = daily_data.sort_index()
 
@@ -162,14 +160,16 @@ def predict_binary_daily_trend(
             continue
 
         prediction_inputs = prediction_inputs.dropna(subset=["target"])
-        
+
         if len(prediction_inputs) < 20:
             log.warning(
                 f"Insufficient data available for model training for symbol: {symbol}"
             )
             continue
 
-        serving_set = prediction_inputs.sample(n=min(len(prediction_inputs) // 10, serving_set_size))
+        serving_set = prediction_inputs.sample(
+            n=min(len(prediction_inputs) // 10, serving_set_size)
+        )
 
         X = prediction_inputs[features]
         y = prediction_inputs["target"]

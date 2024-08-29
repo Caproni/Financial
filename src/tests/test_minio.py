@@ -27,5 +27,3 @@ def test_upload_file():
         object_name="example.txt",
         file_path=test_file,
     )
-    
-    

@@ -26,6 +26,7 @@ if __name__ == "__main__":
 
     materialized_views = [
         "liquid_tickers",
+        "model_profit_analysis",
         "polygon_market_data_day_summary",
         "polygon_market_data_hour_summary",
     ]

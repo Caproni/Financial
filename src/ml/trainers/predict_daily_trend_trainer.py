@@ -172,8 +172,12 @@ def predict_daily_trend_trainer(
                 precision=info["precision"],
                 y_serve=dumps(info["y_serve"]),
                 y_serve_pred=dumps(info["y_serve_pred"]),
-                serving_set_indicated_entry_prices=dumps(info["serving_set_indicated_entry_prices"]),
-                serving_set_indicated_exit_prices=dumps(info["serving_set_indicated_exit_prices"]),
+                serving_set_indicated_entry_prices=dumps(
+                    info["serving_set_indicated_entry_prices"]
+                ),
+                serving_set_indicated_exit_prices=dumps(
+                    info["serving_set_indicated_exit_prices"]
+                ),
                 last_modified_at=info["timestamp"],
                 created_at=info["timestamp"],
             )

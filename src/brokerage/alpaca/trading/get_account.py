@@ -14,4 +14,4 @@ def get_account(
     client: BrokerClient,
 ):
     log.function_call()
-    return client.get_account()
+    return client.list_accounts()[0]

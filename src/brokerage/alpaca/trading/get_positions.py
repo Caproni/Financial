@@ -5,14 +5,14 @@ Copyright 2023
 """
 
 from alpaca.trading.client import TradingClient
-from requests.exceptions import ConnectionError
+from alpaca.trading.models import Position
 
 from src.utils import log
 
 
 def get_positions(
     client: TradingClient,
-):
+) -> list[Position]:
     log.function_call()
 
     try:
