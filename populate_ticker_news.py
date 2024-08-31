@@ -4,9 +4,11 @@ Author: Edmund Bennett
 Copyright 2024
 """
 
+from os import getenv
 from asyncio import run
 from datetime import datetime
 import sentry_sdk
+from dotenv import load_dotenv
 
 from src.sql import create_sql_client, get_data, delete_repeated_data, Tickers
 from src.etl import (
@@ -14,8 +16,10 @@ from src.etl import (
 )
 from src.utils import log
 
+load_dotenv()
+
 sentry_sdk.init(
-    dsn="https://8cd12a857607d331985d59a77ea0828e@o4507797009334272.ingest.de.sentry.io/4507797017133136",
+    dsn=getenv("SENTRY_DSN"),
     traces_sample_rate=1.0,
     profiles_sample_rate=1.0,
 )

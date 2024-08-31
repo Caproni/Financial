@@ -4,7 +4,7 @@ Author: Edmund Bennett
 Copyright 2024
 """
 
-from sqlalchemy import Column, Boolean, String, UUID, DATETIME, Float
+from sqlalchemy import Column, Boolean, String, UUID, DATETIME, Float, TIMESTAMP
 from ..client import Base
 
 
@@ -38,7 +38,8 @@ class Transactions(Base):
     accepted_timestamp = Column(DATETIME, nullable=True)
     order_type = Column(String, nullable=False)
     side = Column(String, nullable=False)
-    value = Column(Float, nullable=True)
+    entry_price = Column(Float, nullable=False)
+    exit_price = Column(Float, nullable=True)
     currency = Column(String, nullable=True)
     quantity = Column(Float, nullable=False)
     ticker = Column(String, nullable=False)
@@ -47,3 +48,5 @@ class Transactions(Base):
     paper = Column(Boolean, nullable=False)
     backtest = Column(Boolean, nullable=False)
     live = Column(Boolean, nullable=False)
+    created_at = Column(TIMESTAMP, nullable=False)
+    last_modified_at = Column(TIMESTAMP, nullable=False)

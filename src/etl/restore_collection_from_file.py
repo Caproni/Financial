@@ -50,6 +50,6 @@ def restore_collection_from_file(
         )
 
     return insert_data(
-        sql_client=database_client,
+        database_client=database_client,
         documents=documents,
     )

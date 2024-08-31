@@ -4,13 +4,10 @@ Author: Edmund Bennett
 Copyright 2024
 """
 
-
-
-
 import sentry_sdk
 import pandas as pd
 from os.path import abspath, join, dirname, isfile
-from os import remove
+from os import remove, getenv
 from datetime import datetime, timedelta
 from sqlalchemy import and_
 from time import sleep
@@ -18,6 +15,8 @@ from json import loads
 from asyncio import run
 from alpaca.trading.enums import TimeInForce, OrderSide, OrderType
 from alpaca.trading.models import Asset
+from dotenv import load_dotenv
+from uuid import uuid4
 
 from src.brokerage.alpaca.client import create_trading_client, create_broker_client
 from src.brokerage.alpaca.broker import get_clock
@@ -26,11 +25,13 @@ from src.brokerage.alpaca.utils import get_timestamp_information
 from src.brokerage.polygon import create_polygon_client, get_market_data
 from src.univariate.analysis import calc_macd
 from src.minio import create_minio_client, download_file
-from src.sql import create_sql_client, get_data, Models, PolygonMarketDataDay
+from src.sql import create_sql_client, get_data, insert_data, Models, PolygonMarketDataDay, Transactions
 from src.utils import log, load_object_from_pickle
 
+load_dotenv()
+
 sentry_sdk.init(
-    dsn="https://8cd12a857607d331985d59a77ea0828e@o4507797009334272.ingest.de.sentry.io/4507797017133136",
+    dsn=getenv("SENTRY_DSN"),
     traces_sample_rate=1.0,
     profiles_sample_rate=1.0,
 )
@@ -40,6 +41,7 @@ if __name__ == "__main__":
     log.info("Preparing to run models.")
 
     debug_mode = False
+    paper = True
 
     now = datetime.now()
 
@@ -50,7 +52,7 @@ if __name__ == "__main__":
     take_profit_percentage: float = 12.0
     stop_loss_percentage: float = 7.0
 
-    alpaca_trading_client = create_trading_client(paper=True)
+    alpaca_trading_client = create_trading_client(paper=paper)
     alpaca_broker_client = create_broker_client()
     database_client = create_sql_client()
     minio_client = create_minio_client()
@@ -82,8 +84,8 @@ if __name__ == "__main__":
         models=[Models],
         where_clause=and_(
             Models.created_at >= now - timedelta(days=model_offset_days),
-            Models.accuracy > 0.5,
-            Models.balanced_accuracy > 0.5,
+            Models.accuracy > 0.6,
+            Models.balanced_accuracy > 0.6,
         ),
     )
 
@@ -194,6 +196,7 @@ if __name__ == "__main__":
     log.info(f"Estimated total short: {sum(short_open_prices)} (min: {min(short_open_prices)}, max: {max(short_open_prices)})")
     log.info(f"Estimated total position: {estimated_total_position}")
 
+    potential_total_transactions = len(long_open_prices) + len(short_open_prices)
     cash = float(alpaca_trading_client.get_account().cash)
 
     for symbol, prediction in predictions.items():
@@ -204,14 +207,16 @@ if __name__ == "__main__":
                 log.info("Symbol cannot be shorted.")
                 continue
 
+            limit_price = prediction_inputs[symbol]["daily_open"].to_list()[0]
+
             submit_order(
                 client=alpaca_trading_client,
                 symbol=symbol,
-                quantity=1,
+                quantity=cash / limit_price / potential_total_transactions,
                 side=OrderSide.BUY if prediction else OrderSide.SELL,
                 order_type=OrderType.LIMIT,
                 time_in_force=TimeInForce.DAY,
-                limit_price=prediction_inputs[symbol]["daily_open"].to_list()[0],
+                limit_price=limit_price,
                 stop_price=None,
                 trail_percent=None,
             )
@@ -243,6 +248,31 @@ if __name__ == "__main__":
                 close_position(
                     client=alpaca_trading_client,
                     symbol=position.symbol,
+                )
+                insert_data(
+                    database_client=database_client,
+                    documents=[
+                        Transactions(
+                            transaction_id=str(uuid4()),
+                            description="...",
+                            ticker=position.symbol,
+                            placed_timestamp=position,
+                            accepted_timestamp=alpaca_clock.now(),
+                            order_type="Limit",
+                            side=position.side,
+                            entry_price=position.cost_basis,
+                            exit_price=position.market_value,
+                            currency="USD",
+                            quantity=position.qty,
+                            exchange=position.exchange,
+                            broker="Alpaca",
+                            paper=paper,
+                            backtest=False,
+                            live=not paper,
+                            created_at=alpaca_clock.now(),
+                            last_modified_at=alpaca_clock.now(),
+                        )
+                    ]
                 )
 
         sleep(60)

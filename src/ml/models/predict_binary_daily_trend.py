@@ -72,6 +72,11 @@ def predict_binary_daily_trend(
         "daily_close",
         "daily_macd_histogram",
         "daily_macd_first_derivative",
+        "monday",
+        "tuesday",
+        "wednesday",
+        "thursday",
+        "friday",
     ]
 
     for symbol, daily_symbol_data in daily_data.groupby("symbol"):

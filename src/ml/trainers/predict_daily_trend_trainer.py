@@ -34,7 +34,7 @@ def predict_daily_trend_trainer(
     Wrapper function to train the Predict Daily Trend predictive model and save the results.
     """
     log.function_call()
-
+    
     database_client = create_sql_client()
 
     minio_client = create_minio_client()
@@ -80,7 +80,7 @@ def predict_daily_trend_trainer(
             f"Accuracy / balanced accuracy for symbol: {info['symbols']} is {accuracy} / {balanced_accuracy}"
         )
         long_positions, long_profits, short_positions, short_profits = [], [], [], []
-        if accuracy > 0.5 and balanced_accuracy > 0.5:
+        if accuracy > 0.6 and balanced_accuracy > 0.6:
             log.info("The model indicates a purchase here.")
             if (
                 info["serving_set_indicated_exit_prices"] is not None
@@ -184,7 +184,7 @@ def predict_daily_trend_trainer(
         )
 
     success = insert_data(
-        sql_client=database_client,
+        database_client=database_client,
         documents=models,
     )
 

@@ -13,7 +13,7 @@ from src.utils import log
 
 
 def insert_data(
-    sql_client: DatabaseClient,
+    database_client: DatabaseClient,
     documents: list[Any],
     allow_partial_inserts: bool = False,
     upsert: bool = False,
@@ -22,13 +22,14 @@ def insert_data(
     Bulk inserts data into the database.
 
     Args:
+        database_client (DatabaseClient): A database client.
         documents (list): A list of Data Transfer Objects (DTOs) to be inserted.
         allow_partial_inserts (bool): If True, allows for partial insertion of documents that do not violate constraints.
         upsert (bool): If True, performs an upsert operation (insert or update).
     """
     log.function_call()
 
-    with sql_client.get_db() as db:
+    with database_client.get_db() as db:
         if allow_partial_inserts or upsert:
             success = True
             for document in documents:

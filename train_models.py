@@ -4,15 +4,19 @@ Author: Edmund Bennett
 Copyright 2024
 """
 
+from os import getenv
 import sentry_sdk
 from datetime import datetime
+from dotenv import load_dotenv
 
 from src.sql import create_sql_client, get_data, LiquidTickers
 from src.ml import predict_daily_trend_trainer
 from src.utils import log
 
+load_dotenv()
+
 sentry_sdk.init(
-    dsn="https://8cd12a857607d331985d59a77ea0828e@o4507797009334272.ingest.de.sentry.io/4507797017133136",
+    dsn=getenv("SENTRY_DSN"),
     traces_sample_rate=1.0,
     profiles_sample_rate=1.0,
 )
@@ -29,7 +33,7 @@ if __name__ == "__main__":
     symbols = [liquid_ticker["symbol"] for liquid_ticker in liquid_tickers]
 
     predict_daily_trend_trainer(
-        start_timestamp=datetime(2020, 4, 1),
+        start_timestamp=datetime(2019, 9, 1),
         end_timestamp=None,
         symbols=symbols,
     )

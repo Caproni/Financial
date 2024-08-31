@@ -55,7 +55,7 @@ def populate_database_related_companies(
     documents = unpack_related_companies(results)
 
     return insert_data(
-        sql_client=database_client,
+        database_client=database_client,
         documents=documents,
         upsert=True,
     )

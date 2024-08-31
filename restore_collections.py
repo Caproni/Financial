@@ -4,8 +4,10 @@ Author: Edmund Bennett
 Copyright 2024
 """
 
+from os import getenv
 from os.path import abspath, join, dirname
 import sentry_sdk
+from dotenv import load_dotenv
 
 from src.etl import restore_collection_from_file
 from src.sql import (
@@ -18,8 +20,10 @@ from src.sql import (
 )
 from src.utils import log
 
+load_dotenv()
+
 sentry_sdk.init(
-    dsn="https://8cd12a857607d331985d59a77ea0828e@o4507797009334272.ingest.de.sentry.io/4507797017133136",
+    dsn=getenv("SENTRY_DSN"),
     traces_sample_rate=1.0,
     profiles_sample_rate=1.0,
 )

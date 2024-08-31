@@ -4,13 +4,17 @@ Author: Edmund Bennett
 Copyright 2024
 """
 
+from os import getenv
 import sentry_sdk
+from dotenv import load_dotenv
 
 from src.viz import plot_history
 from src.utils import log
 
+load_dotenv()
+
 sentry_sdk.init(
-    dsn="https://8cd12a857607d331985d59a77ea0828e@o4507797009334272.ingest.de.sentry.io/4507797017133136",
+    dsn=getenv("SENTRY_DSN"),
     traces_sample_rate=1.0,
     profiles_sample_rate=1.0,
 )
