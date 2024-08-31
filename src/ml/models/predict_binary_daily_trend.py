@@ -14,12 +14,14 @@ from sklearn.metrics import (
     confusion_matrix,
     classification_report,
 )
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, GridSearchCV
 import numpy as np
 from datetime import datetime
+from shap import TreeExplainer
+from shap.plots import beeswarm
 
+from src.ml.utils import one_hot_encode
 from src.univariate.analysis import calc_macd
-from src.ml.analysis import run_pca
 from src.utils import log
 
 
@@ -47,13 +49,32 @@ def predict_binary_daily_trend(
     """
     log.function_call()
 
+    # param_grid = {
+    #     "n_estimators": [100, 200, 300],
+    #     "max_depth": [3, 4, 5],
+    #     "learning_rate": [0.01, 0.1, 0.3],
+    #     "subsample": [0.7, 0.8, 1.0],
+    #     "colsample_bytree": [0.7, 0.8, 1.0],
+    # }
+
     daily_data = daily_data.set_index("timestamp")
     daily_data = daily_data.sort_index()
 
     daily_data["date"] = daily_data.index.date
     daily_data["timestamp"] = daily_data.index.date
     daily_data["daily_hour"] = daily_data.index.hour
-    daily_data["daily_day_of_week"] = daily_data.index.dayofweek
+    daily_data["weekday"] = daily_data.index.dayofweek
+    daily_data = one_hot_encode(
+        daily_data,
+        column="weekday",
+        value_mapping={
+            0: "monday",
+            1: "tuesday",
+            2: "wednesday",
+            3: "thursday",
+            4: "friday",
+        }
+    )
     daily_data = daily_data.drop(labels=["data_id", "otc", "high", "low"], axis=1)
     daily_data = daily_data.rename(
         columns={
@@ -68,15 +89,16 @@ def predict_binary_daily_trend(
     performance_info = []
 
     features = [
-        "daily_open",
+        "daily_open",  # care should be taken here - daily_open and daily_close are first used to calculate the target variable and then shifted
         "daily_close",
         "daily_macd_histogram",
         "daily_macd_first_derivative",
-        "monday",
-        "tuesday",
-        "wednesday",
-        "thursday",
-        "friday",
+        "weekday_monday",
+        "weekday_tuesday",
+        "weekday_wednesday",
+        "weekday_thursday",
+        "weekday_friday",
+        "target_date_daily_open",
     ]
 
     for symbol, daily_symbol_data in daily_data.groupby("symbol"):
@@ -112,7 +134,7 @@ def predict_binary_daily_trend(
             if date.weekday() == 0:  # Monday
                 days_prior = 3  # previous Friday
 
-            # Use data before the current date for training
+            # Use data from trading date before the current date for training
             daily_training_data = daily_symbol_data[
                 daily_symbol_data["date"] == date.date() - timedelta(days=days_prior)
             ]
@@ -145,10 +167,10 @@ def predict_binary_daily_trend(
             prediction_input = daily_training_data.copy()
             prediction_input["target_date_daily_open"] = daily_open[
                 "target_date_daily_open"
-            ].to_list()
+            ].to_list()  # the model will be ran after market open so this will be known
             prediction_input["target_date_daily_close"] = daily_open[
                 "target_date_daily_close"
-            ].to_list()
+            ].to_list()  # this will not be known at the time the model is ran and should not be used in the training set
 
             if prediction_inputs is None:
                 prediction_inputs = prediction_input
@@ -179,8 +201,6 @@ def predict_binary_daily_trend(
         X = prediction_inputs[features]
         y = prediction_inputs["target"]
 
-        X_pca, pca = run_pca(X, n_components=0.95)
-
         X_train, X_test, y_train, y_test = train_test_split(
             X,
             y,
@@ -188,11 +208,22 @@ def predict_binary_daily_trend(
             random_state=1729,
         )
 
-        model = xgb.XGBClassifier(
+        model = xgb.XGBClassifier(  # model_archetype
             objective="binary:logistic",
             eval_metric="logloss",
         )
+        # grid_search = GridSearchCV(
+        #     estimator=model_archetype,
+        #     param_grid=param_grid,
+        #     scoring="balanced_accuracy",
+        #     cv=1,
+        #     verbose=1,
+        #     n_jobs=-1,
+        # )
         model.fit(X_train, y_train)
+        # log.info("Best parameters found: ", grid_search.best_params_)
+        # log.info("Best cross-validation accuracy: ", grid_search.best_score_)
+        # model = grid_search.best_estimator_
 
         y_pred = model.predict(X_test)
         accuracy = accuracy_score(y_test, y_pred)
@@ -210,10 +241,15 @@ def predict_binary_daily_trend(
         log.info("Training model on all data.")
 
         full_model = xgb.XGBClassifier(
+            # **grid_search.best_params_,
             objective="binary:logistic",
             eval_metric="logloss",
         )
         full_model.fit(X, y)
+
+        # explainer = TreeExplainer(full_model, X)
+        # explanation = explainer(X)
+        # beeswarm(explanation, order=explanation.abs.max(0))
 
         log.info("Recording performance information.")
 

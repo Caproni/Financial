@@ -20,12 +20,26 @@ from uuid import uuid4
 
 from src.brokerage.alpaca.client import create_trading_client, create_broker_client
 from src.brokerage.alpaca.broker import get_clock
-from src.brokerage.alpaca.trading import submit_order, get_positions, close_all_positions, close_position, get_assets
+from src.brokerage.alpaca.trading import (
+    submit_order,
+    get_positions,
+    close_all_positions,
+    close_position,
+    get_assets,
+)
 from src.brokerage.alpaca.utils import get_timestamp_information
 from src.brokerage.polygon import create_polygon_client, get_market_data
 from src.univariate.analysis import calc_macd
 from src.minio import create_minio_client, download_file
-from src.sql import create_sql_client, get_data, insert_data, Models, PolygonMarketDataDay, Transactions
+from src.sql import (
+    create_sql_client,
+    get_data,
+    insert_data,
+    Models,
+    PolygonMarketDataDay,
+    Transactions,
+)
+from src.ml.utils import one_hot_encode
 from src.utils import log, load_object_from_pickle
 
 load_dotenv()
@@ -59,7 +73,9 @@ if __name__ == "__main__":
     polygon_client = create_polygon_client()
 
     alpaca_clock = get_clock(alpaca_broker_client)
-    alpaca_assets: list[Asset] = get_assets(alpaca_trading_client, asset_class="us_equity")
+    alpaca_assets: list[Asset] = get_assets(
+        alpaca_trading_client, asset_class="us_equity"
+    )
     alpaca_assets = [a for a in alpaca_assets if a.tradable]
     shortable_stocks = [e.symbol for e in alpaca_assets if e.shortable]
 
@@ -74,10 +90,14 @@ if __name__ == "__main__":
 
     if alpaca_clock.is_open:
         log.info("Market already open. Adjusting market open time.")
-        market_open_offset = timedelta(days=3) if market_open_time.weekday() == 0 else timedelta(days=1)
+        market_open_offset = (
+            timedelta(days=3) if market_open_time.weekday() == 0 else timedelta(days=1)
+        )
         market_open_time -= market_open_offset
 
-    log.info(f"Obtaining metadata for models trained since: {now - timedelta(days=model_offset_days)}")
+    log.info(
+        f"Obtaining metadata for models trained since: {now - timedelta(days=model_offset_days)}"
+    )
 
     predictive_models = get_data(
         database_client=database_client,
@@ -124,6 +144,18 @@ if __name__ == "__main__":
     historical_data = pd.DataFrame(historical_data)
     historical_data = historical_data.set_index("timestamp")
     historical_data = historical_data.sort_index()
+    historical_data["weekday"] = historical_data.index.dayofweek
+    historical_data = one_hot_encode(
+        historical_data,
+        column="weekday",
+        value_mapping={
+            0: "monday",
+            1: "tuesday",
+            2: "wednesday",
+            3: "thursday",
+            4: "friday",
+        }
+    )
 
     prediction_inputs: dict[str, pd.DataFrame] = {}
     for symbol, historical_symbol_data in historical_data.groupby("symbol"):
@@ -133,10 +165,16 @@ if __name__ == "__main__":
         )
         prediction_inputs[symbol] = pd.DataFrame(
             {
-                "daily_open": [None],
+                "daily_open": [historical_symbol_data["open"].to_list()[-1]],
                 "daily_close": [historical_symbol_data["close"].to_list()[-1]],
                 "daily_macd_histogram": [daily_macd_histogram[-1]],
                 "daily_macd_first_derivative": [daily_macd_first_derivative[-1]],
+                "monday": [historical_symbol_data["monday"].to_list()[-1]],
+                "tuesday": [historical_symbol_data["tuesday"].to_list()[-1]],
+                "wednesday": [historical_symbol_data["wednesday"].to_list()[-1]],
+                "thursday": [historical_symbol_data["thursday"].to_list()[-1]],
+                "friday": [historical_symbol_data["friday"].to_list()[-1]],
+                "target_date_daily_open": [None],
             }
         )
 
@@ -169,8 +207,8 @@ if __name__ == "__main__":
         ):
             market_open_bars[symbol] = open_data[0]["open"]
 
-    for symbol, daily_open in market_open_bars.items():
-        prediction_inputs[symbol]["daily_open"] = [daily_open]
+    for symbol, target_date_daily_open in market_open_bars.items():
+        prediction_inputs[symbol]["target_date_daily_open"] = [target_date_daily_open]
 
     log.info("Running models.")
 
@@ -192,8 +230,12 @@ if __name__ == "__main__":
 
     estimated_total_position = sum(long_open_prices) - sum(short_open_prices)
 
-    log.info(f"Estimated total long: {sum(long_open_prices)} (min: {min(long_open_prices)}, max: {max(long_open_prices)})")
-    log.info(f"Estimated total short: {sum(short_open_prices)} (min: {min(short_open_prices)}, max: {max(short_open_prices)})")
+    log.info(
+        f"Estimated total long: {sum(long_open_prices)} (min: {min(long_open_prices)}, max: {max(long_open_prices)})"
+    )
+    log.info(
+        f"Estimated total short: {sum(short_open_prices)} (min: {min(short_open_prices)}, max: {max(short_open_prices)})"
+    )
     log.info(f"Estimated total position: {estimated_total_position}")
 
     potential_total_transactions = len(long_open_prices) + len(short_open_prices)
@@ -207,7 +249,7 @@ if __name__ == "__main__":
                 log.info("Symbol cannot be shorted.")
                 continue
 
-            limit_price = prediction_inputs[symbol]["daily_open"].to_list()[0]
+            limit_price = prediction_inputs[symbol]["target_date_daily_open"].to_list()[0]
 
             submit_order(
                 client=alpaca_trading_client,
@@ -226,7 +268,7 @@ if __name__ == "__main__":
     alpaca_clock = get_clock(alpaca_broker_client)
 
     while alpaca_clock.timestamp < alpaca_clock.next_close - timedelta(seconds=120):
-        
+
         positions = get_positions(
             client=alpaca_trading_client,
         )
@@ -235,11 +277,19 @@ if __name__ == "__main__":
             close_this_position = False
             gone_short = str(position.side) == "PositionSide.SHORT"
             log.info(f"Checking position {position.side} for symbol: {position.symbol}")
-            movement_percentage = 100 * (float(position.market_value) - float(position.cost_basis)) / float(position.cost_basis)
-            if (movement_percentage >= take_profit_percentage and not gone_short) or (-movement_percentage >= take_profit_percentage and gone_short):
+            movement_percentage = (
+                100
+                * (float(position.market_value) - float(position.cost_basis))
+                / float(position.cost_basis)
+            )
+            if (movement_percentage >= take_profit_percentage and not gone_short) or (
+                -movement_percentage >= take_profit_percentage and gone_short
+            ):
                 log.info(f"Taking profit of: {round(abs(movement_percentage), 2)}%")
                 close_this_position = True
-            if (movement_percentage >= stop_loss_percentage and gone_short) or (-movement_percentage >= stop_loss_percentage and not gone_short):
+            if (movement_percentage >= stop_loss_percentage and gone_short) or (
+                -movement_percentage >= stop_loss_percentage and not gone_short
+            ):
                 log.info(f"Realizing loss of: {round(abs(movement_percentage), 2)}%")
                 close_this_position = True
 
@@ -272,7 +322,7 @@ if __name__ == "__main__":
                             created_at=alpaca_clock.now(),
                             last_modified_at=alpaca_clock.now(),
                         )
-                    ]
+                    ],
                 )
 
         sleep(60)

@@ -34,7 +34,7 @@ def predict_daily_trend_trainer(
     Wrapper function to train the Predict Daily Trend predictive model and save the results.
     """
     log.function_call()
-    
+
     database_client = create_sql_client()
 
     minio_client = create_minio_client()
