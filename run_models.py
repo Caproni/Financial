@@ -64,7 +64,7 @@ if __name__ == "__main__":
     model_offset_hours = 20  # models older than this are not considered valid
 
     take_profit_percentage: float = 12.0
-    stop_loss_percentage: float = 7.0
+    stop_loss_percentage: float = 6.0
 
     alpaca_trading_client = create_trading_client(paper=paper)
     alpaca_broker_client = create_broker_client()
@@ -84,6 +84,7 @@ if __name__ == "__main__":
     if (
         not alpaca_clock.is_open
         and alpaca_clock.timestamp + timedelta(days=1) < alpaca_clock.next_open
+        and not debug_mode
     ):
         log.info("Market does not open today. Exiting process.")
         exit()
@@ -144,18 +145,6 @@ if __name__ == "__main__":
     historical_data = pd.DataFrame(historical_data)
     historical_data = historical_data.set_index("timestamp")
     historical_data = historical_data.sort_index()
-    historical_data["weekday"] = historical_data.index.dayofweek
-    historical_data = one_hot_encode(
-        historical_data,
-        column="weekday",
-        value_mapping={
-            0: "monday",
-            1: "tuesday",
-            2: "wednesday",
-            3: "thursday",
-            4: "friday",
-        }
-    )
 
     prediction_inputs: dict[str, pd.DataFrame] = {}
     for symbol, historical_symbol_data in historical_data.groupby("symbol"):
@@ -169,11 +158,11 @@ if __name__ == "__main__":
                 "daily_close": [historical_symbol_data["close"].to_list()[-1]],
                 "daily_macd_histogram": [daily_macd_histogram[-1]],
                 "daily_macd_first_derivative": [daily_macd_first_derivative[-1]],
-                "monday": [historical_symbol_data["monday"].to_list()[-1]],
-                "tuesday": [historical_symbol_data["tuesday"].to_list()[-1]],
-                "wednesday": [historical_symbol_data["wednesday"].to_list()[-1]],
-                "thursday": [historical_symbol_data["thursday"].to_list()[-1]],
-                "friday": [historical_symbol_data["friday"].to_list()[-1]],
+                "monday": [None],
+                "tuesday": [None],
+                "wednesday": [None],
+                "thursday": [None],
+                "friday": [None],
                 "target_date_daily_open": [None],
             }
         )
@@ -205,10 +194,29 @@ if __name__ == "__main__":
                 subtract_day=False,
             )
         ):
-            market_open_bars[symbol] = open_data[0]["open"]
+            market_open_bars[symbol] = pd.DataFrame(open_data)
 
-    for symbol, target_date_daily_open in market_open_bars.items():
-        prediction_inputs[symbol]["target_date_daily_open"] = [target_date_daily_open]
+    for symbol, target_date_data in market_open_bars.items():
+        target_date_data = target_date_data.set_index("timestamp")
+        target_date_data = target_date_data.sort_index()
+        target_date_data["weekday"] = target_date_data.index.dayofweek
+        target_date_data = one_hot_encode(
+            target_date_data,
+            column="weekday",
+            value_mapping={
+                0: "monday",
+                1: "tuesday",
+                2: "wednesday",
+                3: "thursday",
+                4: "friday",
+            }
+        )
+        prediction_inputs[symbol]["target_date_daily_open"] = target_date_data["open"].to_list()
+        prediction_inputs[symbol]["monday"] = target_date_data["weekday_monday"].to_list() if "weekday_monday" in target_date_data.columns else [False]
+        prediction_inputs[symbol]["tuesday"] = target_date_data["weekday_tuesday"].to_list() if "weekday_tuesday" in target_date_data.columns else [False]
+        prediction_inputs[symbol]["wednesday"] = target_date_data["weekday_wednesday"].to_list() if "weekday_wednesday" in target_date_data.columns else [False]
+        prediction_inputs[symbol]["thursday"] = target_date_data["weekday_thursday"].to_list() if "weekday_thursday" in target_date_data.columns else [False]
+        prediction_inputs[symbol]["friday"] = target_date_data["weekday_friday"].to_list() if "weekday_friday" in target_date_data.columns else [False]
 
     log.info("Running models.")
 
