@@ -61,7 +61,7 @@ if __name__ == "__main__":
 
     path_to_staging = abspath(join(dirname(__file__), "staging"))
 
-    model_offset_days = 5  # models older than this are not considered valid
+    model_offset_hours = 20  # models older than this are not considered valid
 
     take_profit_percentage: float = 12.0
     stop_loss_percentage: float = 7.0
@@ -96,14 +96,14 @@ if __name__ == "__main__":
         market_open_time -= market_open_offset
 
     log.info(
-        f"Obtaining metadata for models trained since: {now - timedelta(days=model_offset_days)}"
+        f"Obtaining metadata for models trained since: {now - timedelta(hours=model_offset_hours)}"
     )
 
     predictive_models = get_data(
         database_client=database_client,
         models=[Models],
         where_clause=and_(
-            Models.created_at >= now - timedelta(days=model_offset_days),
+            Models.created_at >= now - timedelta(hours=model_offset_hours),
             Models.accuracy > 0.6,
             Models.balanced_accuracy > 0.6,
         ),
