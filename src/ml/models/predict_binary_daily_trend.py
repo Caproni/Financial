@@ -14,11 +14,9 @@ from sklearn.metrics import (
     confusion_matrix,
     classification_report,
 )
-from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.model_selection import train_test_split
 import numpy as np
 from datetime import datetime
-from shap import TreeExplainer
-from shap.plots import beeswarm
 
 from src.ml.utils import one_hot_encode
 from src.univariate.analysis import calc_macd

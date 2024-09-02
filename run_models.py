@@ -72,6 +72,8 @@ if __name__ == "__main__":
     minio_client = create_minio_client()
     polygon_client = create_polygon_client()
 
+    timestamp_info = get_timestamp_information(alpaca_broker_client, [now])[0]
+
     alpaca_clock = get_clock(alpaca_broker_client)
     alpaca_assets: list[Asset] = get_assets(
         alpaca_trading_client, asset_class="us_equity"
@@ -82,8 +84,7 @@ if __name__ == "__main__":
     market_open_time = alpaca_clock.next_open
 
     if (
-        not alpaca_clock.is_open
-        and alpaca_clock.timestamp + timedelta(days=1) < alpaca_clock.next_open
+        timestamp_info["open"] is None
         and not debug_mode
     ):
         log.info("Market does not open today. Exiting process.")
@@ -126,8 +127,6 @@ if __name__ == "__main__":
         )
 
     log.info("Getting historical model inputs.")
-
-    timestamp_info = get_timestamp_information(alpaca_broker_client, [now])[0]
 
     historical_data = get_data(
         database_client=database_client,
