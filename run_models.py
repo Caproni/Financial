@@ -61,7 +61,7 @@ if __name__ == "__main__":
 
     path_to_staging = abspath(join(dirname(__file__), "staging"))
 
-    model_offset_hours = 20  # models older than this are not considered valid
+    model_offset_hours = 24  # models older than this are not considered valid
 
     take_profit_percentage: float = 12.0
     stop_loss_percentage: float = 6.0
@@ -92,10 +92,7 @@ if __name__ == "__main__":
 
     if alpaca_clock.is_open:
         log.info("Market already open. Adjusting market open time.")
-        market_open_offset = (
-            timedelta(days=3) if market_open_time.weekday() == 0 else timedelta(days=1)
-        )
-        market_open_time -= market_open_offset
+        market_open_time -= timedelta(days=(now - timestamp_info["previous_trading_date"]).days)
 
     log.info(
         f"Obtaining metadata for models trained since: {now - timedelta(hours=model_offset_hours)}"
