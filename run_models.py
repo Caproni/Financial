@@ -17,6 +17,7 @@ from alpaca.trading.enums import TimeInForce, OrderSide, OrderType
 from alpaca.trading.models import Asset
 from dotenv import load_dotenv
 from uuid import uuid4
+from math import ceil
 
 from src.brokerage.alpaca.client import create_trading_client, create_broker_client
 from src.brokerage.alpaca.broker import get_clock
@@ -61,7 +62,7 @@ if __name__ == "__main__":
 
     path_to_staging = abspath(join(dirname(__file__), "staging"))
 
-    model_offset_hours = 24  # models older than this are not considered valid
+    model_offset_hours = 48  # models older than this are not considered valid
 
     take_profit_percentage: float = 12.0
     stop_loss_percentage: float = 6.0
@@ -154,11 +155,11 @@ if __name__ == "__main__":
                 "daily_close": [historical_symbol_data["close"].to_list()[-1]],
                 "daily_macd_histogram": [daily_macd_histogram[-1]],
                 "daily_macd_first_derivative": [daily_macd_first_derivative[-1]],
-                "monday": [None],
-                "tuesday": [None],
-                "wednesday": [None],
-                "thursday": [None],
-                "friday": [None],
+                "weekday_monday": [None],
+                "weekday_tuesday": [None],
+                "weekday_wednesday": [None],
+                "weekday_thursday": [None],
+                "weekday_friday": [None],
                 "target_date_daily_open": [None],
             }
         )
@@ -208,11 +209,11 @@ if __name__ == "__main__":
             }
         )
         prediction_inputs[symbol]["target_date_daily_open"] = target_date_data["open"].to_list()
-        prediction_inputs[symbol]["monday"] = target_date_data["weekday_monday"].to_list() if "weekday_monday" in target_date_data.columns else [False]
-        prediction_inputs[symbol]["tuesday"] = target_date_data["weekday_tuesday"].to_list() if "weekday_tuesday" in target_date_data.columns else [False]
-        prediction_inputs[symbol]["wednesday"] = target_date_data["weekday_wednesday"].to_list() if "weekday_wednesday" in target_date_data.columns else [False]
-        prediction_inputs[symbol]["thursday"] = target_date_data["weekday_thursday"].to_list() if "weekday_thursday" in target_date_data.columns else [False]
-        prediction_inputs[symbol]["friday"] = target_date_data["weekday_friday"].to_list() if "weekday_friday" in target_date_data.columns else [False]
+        prediction_inputs[symbol]["weekday_monday"] = target_date_data["weekday_monday"].to_list() if "weekday_monday" in target_date_data.columns else [False]
+        prediction_inputs[symbol]["weekday_tuesday"] = target_date_data["weekday_tuesday"].to_list() if "weekday_tuesday" in target_date_data.columns else [False]
+        prediction_inputs[symbol]["weekday_wednesday"] = target_date_data["weekday_wednesday"].to_list() if "weekday_wednesday" in target_date_data.columns else [False]
+        prediction_inputs[symbol]["weekday_thursday"] = target_date_data["weekday_thursday"].to_list() if "weekday_thursday" in target_date_data.columns else [False]
+        prediction_inputs[symbol]["weekday_friday"] = target_date_data["weekday_friday"].to_list() if "weekday_friday" in target_date_data.columns else [False]
 
     log.info("Running models.")
 
@@ -228,9 +229,9 @@ if __name__ == "__main__":
     long_open_prices, short_open_prices = [], []
     for symbol, prediction in predictions.items():
         if prediction:
-            long_open_prices.append(market_open_bars[symbol])
+            long_open_prices.append(float(market_open_bars[symbol]["open"][0]))
         else:
-            short_open_prices.append(market_open_bars[symbol])
+            short_open_prices.append(float(market_open_bars[symbol]["open"][0]))
 
     estimated_total_position = sum(long_open_prices) - sum(short_open_prices)
 
@@ -258,7 +259,7 @@ if __name__ == "__main__":
             submit_order(
                 client=alpaca_trading_client,
                 symbol=symbol,
-                quantity=cash / limit_price / potential_total_transactions,
+                quantity=ceil(cash / limit_price / potential_total_transactions),
                 side=OrderSide.BUY if prediction else OrderSide.SELL,
                 order_type=OrderType.LIMIT,
                 time_in_force=TimeInForce.DAY,
@@ -335,6 +336,17 @@ if __name__ == "__main__":
 
     log.info("Reached end of trading. Closing positions.")
 
+    positions = get_positions(
+        client=alpaca_trading_client,
+    )
+
+    for position in positions:
+        close_position(
+            client=alpaca_trading_client,
+            symbol=position.symbol,
+        )
+        # TODO: write to Transactions
+    
     close_all_positions(
         client=alpaca_trading_client,
         cancel_orders=True,
