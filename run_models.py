@@ -92,7 +92,7 @@ if __name__ == "__main__":
 
     if alpaca_clock.is_open:
         log.info("Market already open. Adjusting market open time.")
-        market_open_time -= timedelta(days=(now - timestamp_info["previous_trading_date"]).days)
+        market_open_time -= timedelta(days=(now.date() - timestamp_info["previous_trading_date"]).days)
 
     log.info(
         f"Obtaining metadata for models trained since: {now - timedelta(hours=model_offset_hours)}"
