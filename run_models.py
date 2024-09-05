@@ -62,7 +62,7 @@ if __name__ == "__main__":
 
     path_to_staging = abspath(join(dirname(__file__), "staging"))
 
-    model_offset_hours = 48  # models older than this are not considered valid
+    model_offset_hours = 24  # models older than this are not considered valid
 
     take_profit_percentage: float = 12.0
     stop_loss_percentage: float = 6.0
@@ -219,7 +219,7 @@ if __name__ == "__main__":
 
     predictions = {
         symbol: int(models[symbol].predict(prediction_inputs[symbol])[0])
-        for symbol in market_open_bars.keys()
+        for symbol in market_open_bars
     }
     log.info("Taking positions.")
 
@@ -231,7 +231,8 @@ if __name__ == "__main__":
         if prediction:
             long_open_prices.append(float(market_open_bars[symbol]["open"][0]))
         else:
-            short_open_prices.append(float(market_open_bars[symbol]["open"][0]))
+            if symbol in shortable_stocks:
+                short_open_prices.append(float(market_open_bars[symbol]["open"][0]))
 
     estimated_total_position = sum(long_open_prices) - sum(short_open_prices)
 
@@ -259,7 +260,7 @@ if __name__ == "__main__":
             submit_order(
                 client=alpaca_trading_client,
                 symbol=symbol,
-                quantity=ceil(cash / limit_price / potential_total_transactions),
+                quantity= 4 * ceil(cash / limit_price / potential_total_transactions),
                 side=OrderSide.BUY if prediction else OrderSide.SELL,
                 order_type=OrderType.LIMIT,
                 time_in_force=TimeInForce.DAY,
@@ -272,7 +273,7 @@ if __name__ == "__main__":
 
     alpaca_clock = get_clock(alpaca_broker_client)
 
-    while alpaca_clock.timestamp < alpaca_clock.next_close - timedelta(seconds=120):
+    while alpaca_clock.timestamp < alpaca_clock.next_close - timedelta(seconds=90):
 
         positions = get_positions(
             client=alpaca_trading_client,
@@ -346,7 +347,7 @@ if __name__ == "__main__":
             symbol=position.symbol,
         )
         # TODO: write to Transactions
-    
+
     close_all_positions(
         client=alpaca_trading_client,
         cancel_orders=True,
