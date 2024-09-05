@@ -1,6 +1,6 @@
 FROM --platform=linux/arm64 docker.io/caproni60/financial:base-latest
 
-LABEL entrypoint "update_stocks.py"
+LABEL entrypoint="update_stocks.py"
 
 COPY src /code/src
 

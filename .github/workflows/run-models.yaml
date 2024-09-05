@@ -17,7 +17,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      # Set up Docker Buildx (for multi-arch support)
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+        with:
+          platforms: arm64
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
@@ -32,9 +36,7 @@ jobs:
       - name: Build and Push Docker Image
         uses: docker/build-push-action@v4
         with:
-          # Change this to point to your subdirectory context
           context: . 
-          # Adjust the Dockerfile path as well
           file: ./dockerfiles/Dockerfile.run-models 
           platforms: linux/arm64
           push: true

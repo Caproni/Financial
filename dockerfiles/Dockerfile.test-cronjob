@@ -1,6 +1,6 @@
 FROM --platform=linux/arm64 docker.io/caproni60/financial:base-latest
 
-LABEL entrypoint "test_cronjob.py"
+LABEL entrypoint="test_cronjob.py"
 
 COPY src /code/src
 

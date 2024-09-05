@@ -1,6 +1,6 @@
 FROM --platform=linux/arm64 docker.io/caproni60/financial:base-latest
 
-LABEL entrypoint "run_models.py"
+LABEL entrypoint="run_models.py"
 
 COPY src /code/src
 

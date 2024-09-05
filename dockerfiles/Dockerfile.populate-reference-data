@@ -1,6 +1,6 @@
 FROM --platform=linux/arm64 docker.io/caproni60/financial:base-latest
 
-LABEL entrypoint "populate_reference_data.py"
+LABEL entrypoint="populate_reference_data.py"
 
 COPY src /code/src
 
