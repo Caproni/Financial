@@ -1,4 +1,4 @@
-FROM --platform=linux/arm64 docker.io/caproni60/financial:base-latest
+FROM docker.io/caproni60/financial:base-latest
 
 LABEL entrypoint="run_models.py"
 
