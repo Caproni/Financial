@@ -35,7 +35,7 @@ jobs:
 
       - name: Build base container image
         run: |
-          buildah bud --arch arm --os linux -f ./dockerfiles/Dockerfile.base-latest -t docker.io/caproni60/financial:base-latest .
+          buildah bud --arch arm --os linux -f ./dockerfiles/Dockerfile.base-recursive -t docker.io/caproni60/financial:base-latest .
 
       - name: Push base image to Docker Hub
         run: |
