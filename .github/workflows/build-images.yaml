@@ -1,0 +1,65 @@
+name: Build and Push Container Image with Buildah
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      
+      - name: Set up QEMU
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y qemu-user-static
+          docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+          # Validate that QEMU is registered
+          ls /proc/sys/fs/binfmt_misc/
+
+      - name: Install Buildah
+        run: |
+          sudo apt-get update
+          sudo apt-get -y install buildah
+
+      - name: Log in to Docker Hub
+        run: |
+          buildah login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }} docker.io
+
+      - name: Build base container image
+        run: |
+          buildah bud --arch arm --os linux -f ./dockerfiles/Dockerfile.base-latest -t docker.io/caproni60/financial:base-latest .
+
+      - name: Push base image to Docker Hub
+        run: |
+          buildah push docker.io/caproni60/financial:base-latest
+
+      - name: Build container images
+        run: |
+          buildah bud --arch arm --os linux -f ./dockerfiles/Dockerfile.populate-reference-data -t docker.io/caproni60/financial:populate-reference-data-latest .
+          buildah bud --arch arm --os linux -f ./dockerfiles/Dockerfile.refresh-materialized-views -t docker.io/caproni60/financial:refresh-materialized-views-latest .
+          buildah bud --arch arm --os linux -f ./dockerfiles/Dockerfile.run-models -t docker.io/caproni60/financial:run-models-latest .
+          buildah bud --arch arm --os linux -f ./dockerfiles/Dockerfile.test-cronjob -t docker.io/caproni60/financial:test-cronjob-latest .
+          buildah bud --arch arm --os linux -f ./dockerfiles/Dockerfile.train-models -t docker.io/caproni60/financial:train-models-latest .
+          buildah bud --arch arm --os linux -f ./dockerfiles/Dockerfile.update-stocks -t docker.io/caproni60/financial:update-stocks-latest .
+
+      - name: Push images to Docker Hub
+        run: |
+          buildah push docker.io/caproni60/financial:populate-reference-data-latest
+          buildah push docker.io/caproni60/financial:refresh-materialized-views-latest
+          buildah push docker.io/caproni60/financial:run-models-latest
+          buildah push docker.io/caproni60/financial:test-cronjob-latest
+          buildah push docker.io/caproni60/financial:train-models-latest
+          buildah push docker.io/caproni60/financial:update-stocks-latest
+          
+      # Optional: Log out from Docker Hub
+      - name: Log out from Docker Hub
+        run: |
+          buildah logout docker.io
