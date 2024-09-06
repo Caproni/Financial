@@ -300,36 +300,36 @@ if __name__ == "__main__":
                 close_this_position = True
 
             if close_this_position:
-                log.info(f"Closing position on symbol: {symbol}")
+                log.error(f"Closing position on symbol: {symbol} with change: {round(abs(movement_percentage), 2)}%")
                 close_position(
                     client=alpaca_trading_client,
                     symbol=position.symbol,
                 )
-                # insert_data(
-                #     database_client=database_client,
-                #     documents=[
-                #         Transactions(
-                #             transaction_id=str(uuid4()),
-                #             description=f"Limit: for {round(position.qty, 2)} shares at {round(movement_percentage, 2)} in {position.symbol}",
-                #             ticker=position.symbol,
-                #             placed_timestamp=position,
-                #             accepted_timestamp=alpaca_clock.now(),
-                #             order_type="Limit",
-                #             side="short" if str(position.side) == "PositionSide.SHORT" else "long",
-                #             entry_price=position.cost_basis,
-                #             exit_price=position.market_value,
-                #             currency="USD",
-                #             quantity=position.qty,
-                #             exchange=position.exchange,
-                #             broker="Alpaca",
-                #             paper=paper,
-                #             backtest=False,
-                #             live=not paper,
-                #             created_at=alpaca_clock.now(),
-                #             last_modified_at=alpaca_clock.now(),
-                #         )
-                #     ],
-                # )
+                insert_data(
+                    database_client=database_client,
+                    documents=[
+                        Transactions(
+                            transaction_id=str(uuid4()),
+                            description=f"Limit: for {round(position.qty, 2)} shares at {round(movement_percentage, 2)} in {position.symbol}",
+                            ticker=position.symbol,
+                            placed_timestamp=alpaca_clock.timestamp.date(),
+                            accepted_timestamp=alpaca_clock.timestamp,
+                            order_type="Limit",
+                            side="short" if str(position.side) == "PositionSide.SHORT" else "long",
+                            entry_price=position.cost_basis,
+                            exit_price=position.market_value,
+                            currency="USD",
+                            quantity=position.qty,
+                            exchange=position.exchange,
+                            broker="Alpaca",
+                            paper=paper,
+                            backtest=False,
+                            live=not paper,
+                            created_at=alpaca_clock.timestamp,
+                            last_modified_at=alpaca_clock.timestamp,
+                        )
+                    ],
+                )
 
         sleep(60)
         alpaca_clock = get_clock(alpaca_broker_client)
@@ -346,7 +346,31 @@ if __name__ == "__main__":
             client=alpaca_trading_client,
             symbol=position.symbol,
         )
-        # TODO: write to Transactions
+        insert_data(
+            database_client=database_client,
+            documents=[
+                Transactions(
+                    transaction_id=str(uuid4()),
+                    description=f"Limit: for {round(position.qty, 2)} shares at {round(movement_percentage, 2)} in {position.symbol}",
+                    ticker=position.symbol,
+                    placed_timestamp=alpaca_clock.timestamp.date(),
+                    accepted_timestamp=alpaca_clock.timestamp,
+                    order_type="Limit",
+                    side="short" if str(position.side) == "PositionSide.SHORT" else "long",
+                    entry_price=position.cost_basis,
+                    exit_price=position.market_value,
+                    currency="USD",
+                    quantity=position.qty,
+                    exchange=position.exchange,
+                    broker="Alpaca",
+                    paper=paper,
+                    backtest=False,
+                    live=not paper,
+                    created_at=alpaca_clock.timestamp,
+                    last_modified_at=alpaca_clock.timestamp,
+                )
+            ],
+        )
 
     close_all_positions(
         client=alpaca_trading_client,

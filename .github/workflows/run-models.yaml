@@ -13,22 +13,26 @@ jobs:
     runs-on: ubuntu-latest  # GitHub Actions runs on Ubuntu by default
 
     steps:
-      # Step 1: Checkout the code
       - name: Checkout repository
         uses: actions/checkout@v2
+      
+      - name: Set up QEMU
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y qemu-user-static
+          docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+          # Validate that QEMU is registered
+          ls /proc/sys/fs/binfmt_misc/
 
-      # Step 2: Install Buildah
       - name: Install Buildah
         run: |
           sudo apt-get update
           sudo apt-get -y install buildah
 
-      # Step 3: Log in to Docker Hub (for pushing the image)
       - name: Log in to Docker Hub
         run: |
           buildah login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }} docker.io
 
-      # Step 4: Build the container image using Buildah
       - name: Build the container image
         run: |
           buildah bud --arch arm --os linux -f ./dockerfiles/Dockerfile.update-stocks -t docker.io/caproni60/financial:update-stocks-latest .
