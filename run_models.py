@@ -283,7 +283,7 @@ if __name__ == "__main__":
             submit_order(
                 client=alpaca_trading_client,
                 symbol=symbol,
-                quantity=4 * ceil(cash / limit_price / potential_total_transactions),
+                quantity=2 * ceil(cash / limit_price / potential_total_transactions),
                 side=OrderSide.BUY if prediction else OrderSide.SELL,
                 order_type=OrderType.LIMIT,
                 time_in_force=TimeInForce.DAY,
@@ -330,6 +330,11 @@ if __name__ == "__main__":
                     client=alpaca_trading_client,
                     symbol=position.symbol,
                 )
+                
+                model_id: str | None = None
+                model_metadata = [e for e in predictive_models if position.symbol in e["symbols"]]
+                if model_metadata:
+                    model_id = model_metadata[0]["model_id"]
                 insert_data(
                     database_client=database_client,
                     documents=[
@@ -356,6 +361,7 @@ if __name__ == "__main__":
                             live=not paper,
                             created_at=alpaca_clock.timestamp,
                             last_modified_at=alpaca_clock.timestamp,
+                            model_id=model_id,
                         )
                     ],
                 )
@@ -375,6 +381,10 @@ if __name__ == "__main__":
             client=alpaca_trading_client,
             symbol=position.symbol,
         )
+        model_id: str | None = None
+        model_metadata = [e for e in predictive_models if position.symbol in e["symbols"]]
+        if model_metadata:
+            model_id = model_metadata[0]["model_id"]
         insert_data(
             database_client=database_client,
             documents=[
@@ -401,6 +411,7 @@ if __name__ == "__main__":
                     live=not paper,
                     created_at=alpaca_clock.timestamp,
                     last_modified_at=alpaca_clock.timestamp,
+                    model_id=model_id,
                 )
             ],
         )
