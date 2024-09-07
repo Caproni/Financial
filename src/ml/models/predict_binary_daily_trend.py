@@ -18,6 +18,7 @@ from sklearn.model_selection import train_test_split
 import numpy as np
 from datetime import datetime
 
+from src.ml.viz import plot_pca_results
 from src.ml.utils import one_hot_encode
 from src.univariate.analysis import calc_macd
 from src.utils import log
@@ -94,12 +95,12 @@ def predict_binary_daily_trend(
         "daily_open",  # care should be taken here - daily_open and daily_close are first used to calculate the target variable and then shifted
         "daily_close",
         "daily_macd_histogram",
-        "daily_macd_first_derivative",
-        "weekday_monday",
-        "weekday_tuesday",
-        "weekday_wednesday",
-        "weekday_thursday",
-        "weekday_friday",
+        # "daily_macd_first_derivative",  # PCA indicates that these are not useful
+        # "weekday_monday",
+        # "weekday_tuesday",
+        # "weekday_wednesday",
+        # "weekday_thursday",
+        # "weekday_friday",
         "target_date_daily_open",  # this is the open price on the market data for which a prediction is required
     ]
 
@@ -249,7 +250,8 @@ def predict_binary_daily_trend(
         )
         full_model.fit(X, y)
 
-        PCA(full_model)
+        if diagnostic_plots_flag:
+            plot_pca_results(X)
 
         # explainer = TreeExplainer(full_model, X)
         # explanation = explainer(X)

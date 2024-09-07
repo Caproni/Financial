@@ -29,6 +29,7 @@ def predict_daily_trend_trainer(
     symbols: list[str],
     start_timestamp: datetime | None = None,
     end_timestamp: datetime | None = None,
+    diagnostic_plots_flag: bool = False,
 ) -> None:
     """
     Wrapper function to train the Predict Daily Trend predictive model and save the results.
@@ -70,6 +71,7 @@ def predict_daily_trend_trainer(
         daily_data=pd.DataFrame(daily_data),
         serving_set_size=40,
         threshold_percentage=0.0,
+        diagnostic_plots_flag=diagnostic_plots_flag,
     )
 
     theoretical_max_profits = []

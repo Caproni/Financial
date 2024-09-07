@@ -57,6 +57,19 @@ if __name__ == "__main__":
 
     debug_mode = False
     paper = True
+    
+    features = [
+        "daily_open",  # care should be taken here - daily_open and daily_close are first used to calculate the target variable and then shifted
+        "daily_close",
+        "daily_macd_histogram",
+        # "daily_macd_first_derivative",  # PCA indicates that these are not useful
+        # "weekday_monday",
+        # "weekday_tuesday",
+        # "weekday_wednesday",
+        # "weekday_thursday",
+        # "weekday_friday",
+        "target_date_daily_open",  # this is the open price on the market data for which a prediction is required
+    ]
 
     now = datetime.now()
 
@@ -239,7 +252,7 @@ if __name__ == "__main__":
     log.info("Running models.")
 
     predictions = {
-        symbol: int(models[symbol].predict(prediction_inputs[symbol])[0])
+        symbol: int(models[symbol].predict(prediction_inputs[symbol][features])[0])
         for symbol in market_open_bars
     }
     log.info("Taking positions.")

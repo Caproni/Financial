@@ -36,6 +36,7 @@ if __name__ == "__main__":
         start_timestamp=datetime(2019, 9, 1),
         end_timestamp=None,
         symbols=symbols,
+        diagnostic_plots_flag=False,
     )
 
     log.info("Completed training models.")

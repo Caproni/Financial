@@ -10,7 +10,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
 import plotly.express as px
 
-from ..utils import log
+from ...utils import log
 
 
 def plot_pca_results(model_input_data: pd.DataFrame):
