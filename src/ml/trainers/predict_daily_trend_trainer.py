@@ -78,11 +78,14 @@ def predict_daily_trend_trainer(
     for info in performance_info:
         accuracy = info["accuracy"]
         balanced_accuracy = info["balanced_accuracy"]
+        precision = info["precision"]
+        training_set_rows = info["training_set_rows"]
         log.info(
-            f"Accuracy / balanced accuracy for symbol: {info['symbols']} is {accuracy} / {balanced_accuracy}"
+            f"Accuracy / balanced accuracy / precision for symbol: {info['symbols']} is {accuracy} / {balanced_accuracy} / {precision}"
         )
+        log.info(f"Number of training set rows is: {training_set_rows}")
         long_positions, long_profits, short_positions, short_profits = [], [], [], []
-        if accuracy > 0.6 and balanced_accuracy > 0.6:
+        if precision > 0.6 and training_set_rows > 200:
             log.info("The model indicates a purchase here.")
             if (
                 info["serving_set_indicated_exit_prices"] is not None

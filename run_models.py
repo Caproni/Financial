@@ -116,8 +116,8 @@ if __name__ == "__main__":
         models=[Models],
         where_clause=and_(
             Models.created_at >= now - timedelta(hours=model_offset_hours),
-            Models.accuracy > 0.6,
-            Models.balanced_accuracy > 0.6,
+            Models.precision > 0.6,
+            Models.training_set_rows > 200,
         ),
     )
 
