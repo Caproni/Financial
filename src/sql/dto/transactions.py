@@ -50,3 +50,4 @@ class Transactions(Base):
     live = Column(Boolean, nullable=False)
     created_at = Column(TIMESTAMP, nullable=False)
     last_modified_at = Column(TIMESTAMP, nullable=False)
+    model_id = Column(UUID, nullable=True)

@@ -30,6 +30,7 @@ def predict_binary_daily_trend(
     daily_data: pd.DataFrame,
     serving_set_size: int,
     threshold_percentage: float = 0.0,
+    diagnostic_plots_flag: bool = False,
 ):
     """
     Predicts the daily trend of stock prices based on historical data.
@@ -37,7 +38,10 @@ def predict_binary_daily_trend(
     This function analyzes stock price data to determine whether the price will rise or fall by the end of the trading day. It employs machine learning techniques to train a model for each stock symbol using various features derived from the data.
 
     Args:
-        data (pd.DataFrame): A DataFrame containing stock price data with columns including 'timestamp', 'symbol', 'close', 'open', 'high', 'low', and 'volume'.
+        daily_data (pd.DataFrame): A DataFrame containing stock price data with columns including 'timestamp', 'symbol', 'close', 'open', 'high', 'low', and 'volume'.
+        serving_set_size (int): The number of rows to be included in a serving set.
+        threshold_percentage (float): Percentage added to the entry price. A prediction of 1 indicates that the exit price will have moved by at least this percentage. 
+        diagnostic_plots_flag (bool): Whether to produce diagnostic plots. Defaults to False.
 
     Returns:
         performance_info: A list of dictionaries containing performance metrics for each prediction.
@@ -71,7 +75,7 @@ def predict_binary_daily_trend(
             2: "wednesday",
             3: "thursday",
             4: "friday",
-        }
+        },
     )
     daily_data = daily_data.drop(labels=["data_id", "otc", "high", "low"], axis=1)
     daily_data = daily_data.rename(
@@ -96,7 +100,7 @@ def predict_binary_daily_trend(
         "weekday_wednesday",
         "weekday_thursday",
         "weekday_friday",
-        "target_date_daily_open",
+        "target_date_daily_open",  # this is the open price on the market data for which a prediction is required
     ]
 
     for symbol, daily_symbol_data in daily_data.groupby("symbol"):
@@ -244,6 +248,8 @@ def predict_binary_daily_trend(
             eval_metric="logloss",
         )
         full_model.fit(X, y)
+
+        PCA(full_model)
 
         # explainer = TreeExplainer(full_model, X)
         # explanation = explainer(X)

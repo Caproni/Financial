@@ -11,9 +11,7 @@ from src.utils import log
 
 
 def one_hot_encode(
-    df: pd.DataFrame,
-    column: str,
-    value_mapping: dict[Any, str] | None = None
+    df: pd.DataFrame, column: str, value_mapping: dict[Any, str] | None = None
 ) -> pd.DataFrame:
     """
     One-hot encodes a specified categorical column in a pandas DataFrame.
@@ -27,7 +25,7 @@ def one_hot_encode(
     pd.DataFrame: A DataFrame with the one-hot encoded column.
     """
     log.function_call()
-    
+
     if value_mapping is not None:
         df[column] = df[column].map(value_mapping)
 

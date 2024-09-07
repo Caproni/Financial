@@ -84,16 +84,15 @@ if __name__ == "__main__":
 
     market_open_time = alpaca_clock.next_open
 
-    if (
-        timestamp_info["open"] is None
-        and not debug_mode
-    ):
+    if timestamp_info["open"] is None and not debug_mode:
         log.info("Market does not open today. Exiting process.")
         exit()
 
     if alpaca_clock.is_open:
         log.info("Market already open. Adjusting market open time.")
-        market_open_time -= timedelta(days=(now.date() - timestamp_info["previous_trading_date"]).days)
+        market_open_time -= timedelta(
+            days=(now.date() - timestamp_info["previous_trading_date"]).days
+        )
 
     log.info(
         f"Obtaining metadata for models trained since: {now - timedelta(hours=model_offset_hours)}"
@@ -206,14 +205,36 @@ if __name__ == "__main__":
                 2: "wednesday",
                 3: "thursday",
                 4: "friday",
-            }
+            },
         )
-        prediction_inputs[symbol]["target_date_daily_open"] = target_date_data["open"].to_list()
-        prediction_inputs[symbol]["weekday_monday"] = target_date_data["weekday_monday"].to_list() if "weekday_monday" in target_date_data.columns else [False]
-        prediction_inputs[symbol]["weekday_tuesday"] = target_date_data["weekday_tuesday"].to_list() if "weekday_tuesday" in target_date_data.columns else [False]
-        prediction_inputs[symbol]["weekday_wednesday"] = target_date_data["weekday_wednesday"].to_list() if "weekday_wednesday" in target_date_data.columns else [False]
-        prediction_inputs[symbol]["weekday_thursday"] = target_date_data["weekday_thursday"].to_list() if "weekday_thursday" in target_date_data.columns else [False]
-        prediction_inputs[symbol]["weekday_friday"] = target_date_data["weekday_friday"].to_list() if "weekday_friday" in target_date_data.columns else [False]
+        prediction_inputs[symbol]["target_date_daily_open"] = target_date_data[
+            "open"
+        ].to_list()
+        prediction_inputs[symbol]["weekday_monday"] = (
+            target_date_data["weekday_monday"].to_list()
+            if "weekday_monday" in target_date_data.columns
+            else [False]
+        )
+        prediction_inputs[symbol]["weekday_tuesday"] = (
+            target_date_data["weekday_tuesday"].to_list()
+            if "weekday_tuesday" in target_date_data.columns
+            else [False]
+        )
+        prediction_inputs[symbol]["weekday_wednesday"] = (
+            target_date_data["weekday_wednesday"].to_list()
+            if "weekday_wednesday" in target_date_data.columns
+            else [False]
+        )
+        prediction_inputs[symbol]["weekday_thursday"] = (
+            target_date_data["weekday_thursday"].to_list()
+            if "weekday_thursday" in target_date_data.columns
+            else [False]
+        )
+        prediction_inputs[symbol]["weekday_friday"] = (
+            target_date_data["weekday_friday"].to_list()
+            if "weekday_friday" in target_date_data.columns
+            else [False]
+        )
 
     log.info("Running models.")
 
@@ -255,12 +276,14 @@ if __name__ == "__main__":
                 log.info("Symbol cannot be shorted.")
                 continue
 
-            limit_price = prediction_inputs[symbol]["target_date_daily_open"].to_list()[0]
+            limit_price = prediction_inputs[symbol]["target_date_daily_open"].to_list()[
+                0
+            ]
 
             submit_order(
                 client=alpaca_trading_client,
                 symbol=symbol,
-                quantity= 4 * ceil(cash / limit_price / potential_total_transactions),
+                quantity=4 * ceil(cash / limit_price / potential_total_transactions),
                 side=OrderSide.BUY if prediction else OrderSide.SELL,
                 order_type=OrderType.LIMIT,
                 time_in_force=TimeInForce.DAY,
@@ -300,7 +323,9 @@ if __name__ == "__main__":
                 close_this_position = True
 
             if close_this_position:
-                log.error(f"Closing position on symbol: {symbol} with change: {round(abs(movement_percentage), 2)}%")
+                log.error(
+                    f"Closing position on symbol: {symbol} with change: {round(abs(movement_percentage), 2)}%"
+                )
                 close_position(
                     client=alpaca_trading_client,
                     symbol=position.symbol,
@@ -315,7 +340,11 @@ if __name__ == "__main__":
                             placed_timestamp=alpaca_clock.timestamp.date(),
                             accepted_timestamp=alpaca_clock.timestamp,
                             order_type="Limit",
-                            side="short" if str(position.side) == "PositionSide.SHORT" else "long",
+                            side=(
+                                "short"
+                                if str(position.side) == "PositionSide.SHORT"
+                                else "long"
+                            ),
                             entry_price=position.cost_basis,
                             exit_price=position.market_value,
                             currency="USD",
@@ -356,7 +385,11 @@ if __name__ == "__main__":
                     placed_timestamp=alpaca_clock.timestamp.date(),
                     accepted_timestamp=alpaca_clock.timestamp,
                     order_type="Limit",
-                    side="short" if str(position.side) == "PositionSide.SHORT" else "long",
+                    side=(
+                        "short"
+                        if str(position.side) == "PositionSide.SHORT"
+                        else "long"
+                    ),
                     entry_price=position.cost_basis,
                     exit_price=position.market_value,
                     currency="USD",
