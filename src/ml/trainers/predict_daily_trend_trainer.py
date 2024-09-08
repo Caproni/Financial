@@ -70,7 +70,7 @@ def predict_daily_trend_trainer(
     performance_info = predict_binary_daily_trend(
         daily_data=pd.DataFrame(daily_data),
         serving_set_size=40,
-        threshold_percentage=3.0,
+        threshold_percentage=1.50,
         diagnostic_plots_flag=diagnostic_plots_flag,
     )
 
