@@ -44,38 +44,26 @@ jobs:
       - name: Build container images
         run: |
           buildah bud --arch arm --os linux -f ./dockerfiles/Dockerfile.populate-reference-data \
-          -t docker.io/caproni60/financial:populate-reference-data-latest \
-          -t docker.io/caproni60/financial:populate-reference-data-{{ github.run_number }} .
+          -t docker.io/caproni60/financial:populate-reference-data-latest .
           buildah bud --arch arm --os linux -f ./dockerfiles/Dockerfile.refresh-materialized-views \
-          -t docker.io/caproni60/financial:refresh-materialized-views-latest \
-          -t docker.io/caproni60/financial:refresh-materialized-views-{{ github.run_number }} .
+          -t docker.io/caproni60/financial:refresh-materialized-views-latest .
           buildah bud --arch arm --os linux -f ./dockerfiles/Dockerfile.run-binary-models \
-          -t docker.io/caproni60/financial:run-binary-models-latest \
-          -t docker.io/caproni60/financial:run-binary-models-{{ github.run_number }} .
+          -t docker.io/caproni60/financial:run-binary-models-latest .
           buildah bud --arch arm --os linux -f ./dockerfiles/Dockerfile.test-cronjob \
-          -t docker.io/caproni60/financial:test-cronjob-latest \
-          -t docker.io/caproni60/financial:test-cronjob-{{ github.run_number }} .
+          -t docker.io/caproni60/financial:test-cronjob-latest .
           buildah bud --arch arm --os linux -f ./dockerfiles/Dockerfile.train-binary-models \
-          -t docker.io/caproni60/financial:train-binary-models-latest \
-          -t docker.io/caproni60/financial:train-binary-models-{{ github.run_number }} .
+          -t docker.io/caproni60/financial:train-binary-models-latest .
           buildah bud --arch arm --os linux -f ./dockerfiles/Dockerfile.update-stock-database \
-          -t docker.io/caproni60/financial:update-stock-database-latest \
-          -t docker.io/caproni60/financial:update-stock-database-{{ github.run_number }} .
+          -t docker.io/caproni60/financial:update-stock-database-latest .
 
       - name: Push images to Docker Hub
         run: |
           buildah push docker.io/caproni60/financial:populate-reference-data-latest
-          buildah push docker.io/caproni60/financial:populate-reference-data-{{ github.run_number }}
           buildah push docker.io/caproni60/financial:refresh-materialized-views-latest
-          buildah push docker.io/caproni60/financial:refresh-materialized-views-{{ github.run_number }}
           buildah push docker.io/caproni60/financial:run-binary-models-latest
-          buildah push docker.io/caproni60/financial:run-binary-models-{{ github.run_number }}
           buildah push docker.io/caproni60/financial:test-cronjob-latest
-          buildah push docker.io/caproni60/financial:test-cronjob-{{ github.run_number }}
           buildah push docker.io/caproni60/financial:train-binary-models-latest
-          buildah push docker.io/caproni60/financial:train-binary-models-{{ github.run_number }}
           buildah push docker.io/caproni60/financial:update-stock-database-latest
-          buildah push docker.io/caproni60/financial:update-stock-database-{{ github.run_number }}
           
       # Optional: Log out from Docker Hub
       - name: Log out from Docker Hub
