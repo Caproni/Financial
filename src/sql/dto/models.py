@@ -36,3 +36,5 @@ class Models(Base):
     serving_set_indicated_exit_prices = Column(String, nullable=False)
     last_modified_at = Column(TIMESTAMP, nullable=False)
     created_at = Column(TIMESTAMP, nullable=False)
+    threshold_percentage = Column(Float, nullable=True)
+    f1 = Column(Float, nullable=True)

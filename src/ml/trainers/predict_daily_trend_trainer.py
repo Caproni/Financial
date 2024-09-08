@@ -70,7 +70,7 @@ def predict_daily_trend_trainer(
     performance_info = predict_binary_daily_trend(
         daily_data=pd.DataFrame(daily_data),
         serving_set_size=40,
-        threshold_percentage=0.0,
+        threshold_percentage=3.0,
         diagnostic_plots_flag=diagnostic_plots_flag,
     )
 
@@ -86,7 +86,7 @@ def predict_daily_trend_trainer(
         log.info(f"Number of training set rows is: {training_set_rows}")
         long_positions, long_profits, short_positions, short_profits = [], [], [], []
         if precision > 0.6 and training_set_rows > 200:
-            log.info("The model indicates a purchase here.")
+            log.info("The model indicates market entry here.")
             if (
                 info["serving_set_indicated_exit_prices"] is not None
                 and info["serving_set_indicated_entry_prices"] is not None
@@ -173,6 +173,7 @@ def predict_daily_trend_trainer(
                 serving_data_url=f"{partial_filename}_serving_data.pkl.gz",
                 serving_targets_url=f"{partial_filename}_serving_targets.pkl.gz",
                 accuracy=info["accuracy"],
+                f1=info["f1"],
                 balanced_accuracy=info["balanced_accuracy"],
                 precision=info["precision"],
                 y_serve=dumps(info["y_serve"]),
@@ -185,6 +186,7 @@ def predict_daily_trend_trainer(
                 ),
                 last_modified_at=info["timestamp"],
                 created_at=info["timestamp"],
+                threshold_percentage=info["threshold_percentage"],
             )
         )
 
