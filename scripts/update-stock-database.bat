@@ -1,0 +1,2 @@
+wsl buildah bud --arch arm --os linux -f ../dockerfiles/Dockerfile.update-stock-database -t docker.io/caproni60/financial:update-stock-database-latest ..
+wsl podman push docker.io/caproni60/financial:update-stock-database-latest

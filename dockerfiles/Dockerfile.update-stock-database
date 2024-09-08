@@ -1,0 +1,11 @@
+FROM --platform=linux/arm64 docker.io/caproni60/financial:base-latest
+
+LABEL entrypoint="update_stock_database.py"
+
+COPY src /code/src
+
+COPY update_stock_database.py /code/
+
+RUN chmod +x /code/update_stock_database.py
+
+ENTRYPOINT ["python", "update_stock_database.py"]

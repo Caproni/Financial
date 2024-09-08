@@ -1,0 +1,11 @@
+FROM docker.io/caproni60/financial:base-latest
+
+LABEL entrypoint="run_binary_models.py"
+
+COPY src /code/src
+
+COPY run_binary_models.py /code/
+
+RUN chmod +x /code/run_binary_models.py
+
+ENTRYPOINT ["python", "run_binary_models.py"]

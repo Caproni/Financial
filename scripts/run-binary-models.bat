@@ -1,0 +1,2 @@
+wsl buildah bud --arch arm --os linux -f ../dockerfiles/Dockerfile.run-binary-models -t docker.io/caproni60/financial:run-binary-models-latest ..
+wsl podman push docker.io/caproni60/financial:run-binary-models-latest
