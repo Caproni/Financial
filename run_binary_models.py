@@ -76,7 +76,7 @@ if __name__ == "__main__":
 
     path_to_staging = abspath(join(dirname(__file__), "staging"))
 
-    model_offset_hours = 24  # models older than this are not considered valid
+    model_offset_hours = 12  # models older than this are not considered valid
 
     take_profit_percentage: float = 12.0
     stop_loss_percentage: float = 6.0
@@ -119,6 +119,7 @@ if __name__ == "__main__":
             Models.created_at >= now - timedelta(hours=model_offset_hours),
             Models.precision > 0.6,
             Models.training_set_rows > 200,
+            Models.threshold_percentage.is_not(None),
         ),
     )
 
