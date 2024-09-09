@@ -54,7 +54,7 @@ sentry_sdk.init(
 
 if __name__ == "__main__":
 
-    log.info("Preparing to run models.")
+    log.error("Preparing to run models.")
 
     debug_mode = False
     paper = True
@@ -198,6 +198,8 @@ if __name__ == "__main__":
         sleep(
             (alpaca_clock.next_open - alpaca_clock.timestamp).seconds + 15 * 60
         )  # Will commence 15 minutes after market open
+
+    log.error("Sleep finished. Commencing strategy.")
 
     log.info("Getting market open data.")
 
@@ -472,4 +474,4 @@ if __name__ == "__main__":
         if isfile(join(path_to_staging, predictive_model["model_url"])):
             remove(join(path_to_staging, predictive_model["model_url"]))
 
-    log.info("Completed running models.")
+    log.error("Completed running models.")
