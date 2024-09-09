@@ -76,7 +76,7 @@ if __name__ == "__main__":
 
     path_to_staging = abspath(join(dirname(__file__), "staging"))
 
-    model_offset_hours = 12  # models older than this are not considered valid
+    model_offset_hours = 24  # models older than this are not considered valid
 
     take_profit_percentage: float = 12.0
     stop_loss_percentage: float = 6.0
