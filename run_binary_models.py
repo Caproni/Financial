@@ -10,7 +10,7 @@ import pandas as pd
 from os.path import abspath, join, dirname, isfile
 from os import remove, getenv
 from datetime import datetime, timedelta
-from sqlalchemy import and_
+from sqlalchemy import and_, text
 from time import sleep
 from json import loads
 from asyncio import run
@@ -76,10 +76,11 @@ if __name__ == "__main__":
 
     path_to_staging = abspath(join(dirname(__file__), "staging"))
 
-    model_offset_hours = 140  # models older than this are not considered valid
+    model_offset_hours = 24 * 3 - 6  # models older than this are not considered valid
 
     take_profit_percentage: float = 12.0
     stop_loss_percentage: float = 6.0
+    stock_price_threshold: float = 0.01
 
     alpaca_trading_client = create_trading_client(paper=paper)
     alpaca_broker_client = create_broker_client()
@@ -120,6 +121,7 @@ if __name__ == "__main__":
             Models.precision > 0.6,
             Models.training_set_rows > 200,
             Models.threshold_percentage.is_not(None),
+            text(f"cast(serving_set_indicated_entry_prices::json->>0 AS Float) >= {stock_price_threshold}"),
         ),
     )
 
