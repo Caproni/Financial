@@ -140,12 +140,12 @@ if __name__ == "__main__":
                 model_location
             )
         elif float(predictive_model["threshold_percentage"]) > 0.0:
-            models_positive_threshold[loads(predictive_model["symbols"])[0]] = load_object_from_pickle(
-                model_location
+            models_positive_threshold[loads(predictive_model["symbols"])[0]] = (
+                load_object_from_pickle(model_location)
             )
         elif float(predictive_model["threshold_percentage"]) < 0.0:
-            models_negative_threshold[loads(predictive_model["symbols"])[0]] = load_object_from_pickle(
-                model_location
+            models_negative_threshold[loads(predictive_model["symbols"])[0]] = (
+                load_object_from_pickle(model_location)
             )
 
     log.info("Getting historical model inputs.")
@@ -270,16 +270,23 @@ if __name__ == "__main__":
         for symbol in market_open_bars
     }
     predictions_positive_threshold = {
-        symbol: int(models_positive_threshold[symbol].predict(prediction_inputs[symbol][features])[0])
+        symbol: int(
+            models_positive_threshold[symbol].predict(
+                prediction_inputs[symbol][features]
+            )[0]
+        )
         for symbol in market_open_bars
     }
     predictions_negative_threshold = {
-        symbol: int(models_negative_threshold[symbol].predict(prediction_inputs[symbol][features])[0])
+        symbol: int(
+            models_negative_threshold[symbol].predict(
+                prediction_inputs[symbol][features]
+            )[0]
+        )
         for symbol in market_open_bars
     }
 
     log.info("Taking positions.")
-
 
     long_positions, short_positions = 0, 0
     for symbol, prediction in predictions.items():
@@ -292,7 +299,11 @@ if __name__ == "__main__":
     for symbol, prediction in predictions.items():
         if prediction and models_positive_threshold[symbol]:
             long_open_prices.append(float(market_open_bars[symbol]["open"][0]))
-        if not prediction and models_negative_threshold[symbol] and symbol in shortable_stocks:
+        if (
+            not prediction
+            and models_negative_threshold[symbol]
+            and symbol in shortable_stocks
+        ):
             short_open_prices.append(float(market_open_bars[symbol]["open"][0]))
 
     estimated_total_position = sum(long_open_prices) - sum(short_open_prices)
@@ -309,7 +320,9 @@ if __name__ == "__main__":
     cash = float(alpaca_trading_client.get_account().cash)
 
     for symbol, prediction in predictions.items():
-        if (prediction and models_positive_threshold[symbol]) or (not prediction and models_negative_threshold[symbol]):
+        if (prediction and models_positive_threshold[symbol]) or (
+            not prediction and models_negative_threshold[symbol]
+        ):
             log.info(f"Preparing to trade symbol: {symbol}")
             if symbol in [e.symbol for e in alpaca_assets]:
                 log.info("Stock can be traded.")
@@ -317,14 +330,15 @@ if __name__ == "__main__":
                     log.info("Symbol cannot be shorted.")
                     continue
 
-                limit_price = prediction_inputs[symbol]["target_date_daily_open"].to_list()[
-                    0
-                ]
+                limit_price = prediction_inputs[symbol][
+                    "target_date_daily_open"
+                ].to_list()[0]
 
                 submit_order(
                     client=alpaca_trading_client,
                     symbol=symbol,
-                    quantity=2 * ceil(cash / limit_price / potential_total_transactions),
+                    quantity=2
+                    * ceil(cash / limit_price / potential_total_transactions),
                     side=OrderSide.BUY if prediction else OrderSide.SELL,
                     order_type=OrderType.LIMIT,
                     time_in_force=TimeInForce.DAY,
@@ -374,9 +388,7 @@ if __name__ == "__main__":
 
                 model_id: str | None = None
                 if model_metadata := [
-                    e
-                    for e in predictive_models
-                    if position.symbol in e["symbols"]
+                    e for e in predictive_models if position.symbol in e["symbols"]
                 ]:
                     model_id = model_metadata[0]["model_id"]
 
