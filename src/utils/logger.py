@@ -36,7 +36,7 @@ class CustomLogger(Logger):
 
         # Create a temporary formatter with the correct file and line information
         temp_formatter = WhitespaceRemovingFormatter(
-            f"%(asctime)s.%(msecs)03d %(levelname)-8s [{file_name}:{line_number}] %(message)s",
+            f"%(asctime)s.%(msecs)03d %(levelname)s [{file_name}:{line_number}] %(message)s",
             "%Y-%m-%d %H:%M:%S",
         )
 
@@ -131,7 +131,7 @@ class WhitespaceRemovingFormatter(Formatter):
 # https://docs.python.org/3/library/logging.html
 
 formatter = WhitespaceRemovingFormatter(
-    "%(asctime)s.%(msecs)03d %(levelname)-8s \
+    "%(asctime)s.%(msecs)03d %(levelname)s \
         [%(filename)s:%(lineno)d] %(message)s",
     "%Y-%m-%d %H:%M:%S",
 )
