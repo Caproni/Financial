@@ -5,6 +5,7 @@ Copyright 2024
 """
 
 from typing import Callable, Optional, Any
+from types import FrameType
 from logging import Logger, Formatter, StreamHandler, getLogger, INFO, setLoggerClass
 from concurrent_log_handler import ConcurrentRotatingFileHandler
 from tempfile import gettempdir
@@ -17,7 +18,10 @@ import inspect
 
 # Subclass the Logger class to add the custom method
 class CustomLogger(Logger):
-    def function_call(self):
+    def __init__(self, name: str, level: int = INFO) -> None:
+        super().__init__(name, level)
+
+    def function_call(self) -> None:
         """Creates a info log line for when a function is called.
 
         Example usage:
@@ -28,33 +32,35 @@ class CustomLogger(Logger):
         >>>
         >>> 2016-05-28 00:00:00.000 INFO     [some_file.py:22] Calling some_function
         """
-        frame = inspect.currentframe().f_back
-        func_name = frame.f_code.co_name
-        file_path = frame.f_code.co_filename
-        file_name = basename(file_path)
-        line_number = frame.f_lineno
+        currentframe: Optional[FrameType] = inspect.currentframe()
+        if currentframe is not None and currentframe.f_back is not None:
+            frame = inspect.currentframe().f_back
+            func_name = frame.f_code.co_name
+            file_path = frame.f_code.co_filename
+            file_name = basename(file_path)
+            line_number = frame.f_lineno
 
-        # Create a temporary formatter with the correct file and line information
-        temp_formatter = WhitespaceRemovingFormatter(
-            f"%(asctime)s.%(msecs)03d %(levelname)s [{file_name}:{line_number}] %(message)s",
-            "%Y-%m-%d %H:%M:%S",
-        )
+            # Create a temporary formatter with the correct file and line information
+            temp_formatter = WhitespaceRemovingFormatter(
+                f"%(asctime)s.%(msecs)03d %(levelname)s [{file_name}:{line_number}] %(message)s",
+                "%Y-%m-%d %H:%M:%S",
+            )
 
-        # Store the original formatters
-        original_formatters = [
-            (handler, handler.formatter) for handler in self.handlers
-        ]
+            # Store the original formatters
+            original_formatters = [
+                (handler, handler.formatter) for handler in self.handlers
+            ]
 
-        # Set the temporary formatter
-        for handler in self.handlers:
-            handler.setFormatter(temp_formatter)
+            # Set the temporary formatter
+            for handler in self.handlers:
+                handler.setFormatter(temp_formatter)
 
-        # Log the function call
-        self.info(f"Calling {func_name}")
+            # Log the function call
+            self.info(f"Calling {func_name}")
 
-        # Restore the original formatters
-        for handler, formatter in original_formatters:
-            handler.setFormatter(formatter)
+            # Restore the original formatters
+            for handler, formatter in original_formatters:
+                handler.setFormatter(formatter)
 
 
 def function_timer(log_result: bool = False) -> Callable:
@@ -131,14 +137,13 @@ class WhitespaceRemovingFormatter(Formatter):
 # https://docs.python.org/3/library/logging.html
 
 formatter = WhitespaceRemovingFormatter(
-    "%(asctime)s.%(msecs)03d %(levelname)s \
-        [%(filename)s:%(lineno)d] %(message)s",
+    "%(asctime)s.%(msecs)03d %(levelname)s [%(filename)s:%(lineno)d] %(message)s",
     "%Y-%m-%d %H:%M:%S",
 )
 
 file_handler = ConcurrentRotatingFileHandler(
     join(
-        gettempdir(), "financial.log"
+        gettempdir(), "reporting.log"
     ),  # on a Windows device this normally points to C:\Users\Username\AppData\Local\Temp\
     maxBytes=10000000,
     backupCount=5,
